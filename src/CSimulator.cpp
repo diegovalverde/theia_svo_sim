@@ -4,30 +4,97 @@
 #include <iostream>
 #include <fstream>
 
+
 #define NULL_MORTON_IDX 0
 
+
+//--------------------------------------------------------------------------------------------
+string CallBack_Exit(vector<string> aArg, CSimulator * aSim )
+{
+	exit(0);
+}
+//--------------------------------------------------------------------------------------------
+string CallBack_Load(vector<string> aArg, CSimulator * aSim )
+{
+	if (aArg.size() != 2)
+		return "invalid number of arguments";
+	string OperationType = aArg[0];
+	string FilePath      = aArg[1];
+
+	if (OperationType == "config")
+		return aSim->LoadConfigurationFile(FilePath);
+	else
+		return OperationType + " : invalid load type";
+}
+//--------------------------------------------------------------------------------------------
+string CallBack_Save(vector<string> aArg, CSimulator * aSim )
+{
+	if (aArg.size() != 2)
+		return "invalid number of arguments";
+
+	string OperationType = aArg[0];
+	string FilePath      = aArg[1];
+
+	if (OperationType == "octree")
+	{
+		aSim->Scene.OCtree.DumpWireFrame( FilePath, COctree::DUMP_LEAFS );
+		return "Done saving Octree";
+	} else
+	if (OperationType == "projection_plane")
+	{
+		aSim->Scene.Camera.WriteProjectionPlaneObj(FilePath);
+		return "Done saving projection plane";
+	}
+	else
+		return OperationType + " : invalid save type";
+}
+//--------------------------------------------------------------------------------------------
+string CallBack_Render(vector<string> aArg, CSimulator * aSim )
+{
+	if (aArg.size() != 1)
+		return "invalid number of arguments";
+
+
+	aSim->RenderFrame( aArg[0] );
+	return "Render done";
+
+}
 //--------------------------------------------------------------------------------------------
 CSimulator::CSimulator()
 {
+	
+	mCommands["load"]		=  CallBack_Load;
+	mCommands["save"]		=  CallBack_Save;
+	mCommands["quit"]		=  CallBack_Exit;
+	mCommands["render"]		=  CallBack_Render;
+
+	
 }
 //--------------------------------------------------------------------------------------------
 CSimulator::~CSimulator()
 {
 }
 //--------------------------------------------------------------------------------------------
-void CSimulator::Initialize( string aFileName )
+string CSimulator::ExecuteCommand(vector<string> aArguments)
 {
-	Gpu.Rgu.Scene = &Scene;
-	Gpu.Rgu.Statistics = &Statistics;
-	Gpu.Gt.Scene = &Scene;
+	if (aArguments.size() < 1)
+		return  "Invalid command line size";
 
-	ifstream ifs( aFileName.c_str() );
+	string Command = aArguments[0];
+	aArguments.erase( aArguments.begin() );
+
+	if (mCommands.find( Command  ) == mCommands.end())
+		return Command + " : Command not found";
+
+	return mCommands[Command]( aArguments, this );
+}
+//--------------------------------------------------------------------------------------------
+string CSimulator::LoadConfigurationFile( string aFileName  )
+{
+		ifstream ifs( aFileName.c_str() );
 	if (!ifs.good() )
-	{
-		cout << "File not found " << aFileName << "\n";
-		exit(1);
-	}
-	
+	  return  aFileName + " : File not found ";
+		
 	vector<string> Tokens;
 	while (ifs.good())
 	{
@@ -123,12 +190,23 @@ void CSimulator::Initialize( string aFileName )
 
 	}//while
 
+	return "File Loaded";
+}
+//--------------------------------------------------------------------------------------------
+void CSimulator::Initialize( string aFileName )
+{
+	Gpu.Rgu.Scene = &Scene;
+	Gpu.Rgu.Statistics = &Statistics;
+	Gpu.Gt.Scene = &Scene;
+
+
+
 	Scene.Camera.Initialize();
 }
 //--------------------------------------------------------------------------------------------
-void CSimulator::RenderFrame()
+void CSimulator::RenderFrame( string aFileName )
 {
-	ofstream ofs("output.ppm");
+	ofstream ofs(aFileName.c_str());
 	ofs << "P3\n";
 	ofs << Scene.ResolutionWidth << " " << Scene.ResolutionHeight << "\n";
 	ofs << "255\n";
@@ -140,11 +218,8 @@ void CSimulator::RenderFrame()
 		
 		for (int i = 0; i < Scene.ResolutionWidth; i++)
 		{
-
 			CRay Ray =  Gpu.Rgu.Execute( i,j );
-			
 			TMortonCode  GtResut = Gpu.Gt.Execute( Ray );
-
 
 			if (GtResut == NULL_MORTON_IDX)
 			{
@@ -155,8 +230,6 @@ void CSimulator::RenderFrame()
 				ofs << "#" << GtResut << "\n";
 				ofs << " 255 255 255\n";	
 			}
-
-
 		}
 	}
 
