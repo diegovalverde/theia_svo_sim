@@ -5,12 +5,16 @@
 
 #include <string>
 #include <vector>
+#include <functional>
+#include <map>
 using namespace std;
 
 #include "../../include/Geometry.h"
 #include "../include/CStatistics.h"
 #include "../include/CRayGenertionUnit.h"
 #include "../include/CGeometryTraversalUnit.h"
+
+
 
 //------------------------------------------------------------------
 class CGpu
@@ -36,17 +40,22 @@ public:
 	~CSimulator();
 
 public:
-	
+	typedef std::function<string (vector<string>, CSimulator * aSimulator ) > TCommand;
+
+public:	
 	
 	CStatistics		Statistics;
 	void			Initialize( string aFileName );
+	string          LoadConfigurationFile( string aFileName );
+	string          ExecuteCommand(vector<string> aCommands);
 public:
-	void RenderFrame( void );
+	void RenderFrame( string aFileName );
 	CScene Scene;
 	CGpu   Gpu;
 
 private:
 	bool mRunning;
+	map<string, TCommand> mCommands;
 
 };
 //------------------------------------------------------------------
