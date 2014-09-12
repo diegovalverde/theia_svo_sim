@@ -9,7 +9,7 @@
 #include <map>
 using namespace std;
 
-#include "../../include/Geometry.h"
+#include "../include/Geometry.h"
 #include "../include/CStatistics.h"
 #include "../include/CRayGenertionUnit.h"
 #include "../include/CGeometryTraversalUnit.h"

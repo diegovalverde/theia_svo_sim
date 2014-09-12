@@ -1,7 +1,7 @@
 #ifndef GEOMETRY_TRAVERSAL_UNIT_INCLUDED
 #define GEOMETRY_TRAVERSAL_UNIT_INCLUDED
 
-#include "../../include/Geometry.h"
+#include "../include/Geometry.h"
 #include "../include/CStatistics.h"
 #include "../include/CScene.h"
 

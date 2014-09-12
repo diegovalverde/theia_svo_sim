@@ -1,6 +1,6 @@
 #ifndef SCENE_H_INCLUDED
 #define SCENE_H_INCLUDED
-#include "../../include/Geometry.h"
+#include "../include/Geometry.h"
 #include "../include/CCamera.h"
 #include "../include/COctree.h"
 //---------------------------------------------------------------------------------------------------------------------

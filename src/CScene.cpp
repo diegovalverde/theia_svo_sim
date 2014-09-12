@@ -1,6 +1,8 @@
 #include "../include/CScene.h"
-#include "../../include/Common.h"
+#include "../include/Common.h"
 #include <fstream>
+#include <stdlib.h>
+
 
 #define OBJ_TYPE_RAW_VERTEX "v"
 #define OBJ_TYPE_FACE       "f"

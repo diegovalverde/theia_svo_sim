@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <limits>
 
 #define VOXELIZE 1
 //-------------------------------------------------------------------------------------------------------------

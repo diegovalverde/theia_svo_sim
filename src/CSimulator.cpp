@@ -1,5 +1,5 @@
 #include "../include/CSimulator.h"
-#include "../../include/Common.h"
+#include "../include/Common.h"
 
 #include <iostream>
 #include <fstream>

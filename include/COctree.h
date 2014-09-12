@@ -1,6 +1,6 @@
 #ifndef COCTREE_H_INCLUDED
 #define COCTREE_H_INCLUDED
-#include "../../include/Geometry.h"
+#include "Geometry.h"
 #include <map>
 
 enum E_OCTANT

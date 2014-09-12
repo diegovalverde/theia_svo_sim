@@ -1,4 +1,4 @@
-#include "../../include/Geometry.h"
+#include "Geometry.h"
 #include "../include/CCamera.h"
 #include "../include/CStatistics.h"
 #include "../include/CScene.h"

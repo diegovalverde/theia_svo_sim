@@ -1,6 +1,6 @@
 #ifndef CCAMERA_H_INCLUDED
 #define CCAMERA_H_INCLUDED
-#include "../../include/Geometry.h"
+#include "Geometry.h"
 #include <fstream>
 
 class CCamera
