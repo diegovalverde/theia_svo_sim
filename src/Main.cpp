@@ -1,6 +1,10 @@
 #include "../include/CSimulator.h"
 #include <sstream>
 #include <iterator>
+#ifndef _WIN32
+ #include <readline/readline.h>
+ #include <readline/history.h>
+#endif
 
 CSimulator Simulator;
 
@@ -13,21 +17,24 @@ int main(void)
 	
 	//Simulator.Initialize("suzane_avo__depth_2.config");
 
-		
-
-	//Populate the OCtree
-//	Simulator.Scene.OCtree.Populate( Simulator.Scene.Geometry );
-
-	//Simulator.Scene.OCtree.DumpObjMainBoundingCube( "BoundingCube.obj" );
-
-	//Simulator.Scene.OCtree.DumpWireFrame( "OCtree.obj", COctree::DUMP_LEAFS );
-
+	
 	while (1)
 	{
-		cout << "::";
+		string Prompt = "<simulator>::";
 		string Line;
+
+#ifndef _WIN32
+
+      
+        char * cLine = readline(Prompt.str().c_str());
+        if (*cLine)
+                add_history(cLine);
+        Line = string(cLine);
+#else
+		cout << Prompt;
 		std::getline (std::cin,Line);
 		stringstream ss(Line);
+#endif
 		std::istream_iterator<string> begin(ss);
 		std::istream_iterator<string> end;
 		vector<string> Tokens(begin, end);
