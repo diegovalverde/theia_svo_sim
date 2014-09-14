@@ -178,6 +178,8 @@ string CSimulator::ExecuteCommand(vector<string> aArguments)
 //--------------------------------------------------------------------------------------------
 string CSimulator::LoadConfigurationFile( string aFileName  )
 {
+	cout <<  "-I- Loading configuration from '"<<  aFileName << "'\n";
+
 	ifstream ifs( aFileName.c_str() );
 	if (!ifs.good() )
 	  return  aFileName + " : File not found ";
