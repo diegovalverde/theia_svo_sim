@@ -33,8 +33,8 @@ int main(void)
 #else
 		cout << Prompt;
 		std::getline (std::cin,Line);
-		stringstream ss(Line);
 #endif
+		stringstream ss(Line);
 		std::istream_iterator<string> begin(ss);
 		std::istream_iterator<string> end;
 		vector<string> Tokens(begin, end);
