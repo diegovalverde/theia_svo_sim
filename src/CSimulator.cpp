@@ -199,9 +199,9 @@ string CSimulator::LoadConfigurationFile( string aFileName  )
 		Tokenize(CurrentLine,Tokens,"=");
 		string TokenType = Tokens[0];
 
-		if (TokenType == "VoxelObjectFilePath")
+		if (TokenType == "Scene.Object")
 		{
-			//Scene.LoadVoxels( Tokens[1] );
+			
 			Scene.LoadObject( Tokens[1]  );
 			continue;
 		}

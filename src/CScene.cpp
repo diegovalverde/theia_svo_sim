@@ -58,8 +58,8 @@ void CScene::LoadObject( string aFileName )
 	ifstream ifs( aFileName.c_str() );
 	if (!ifs.good() )
 	{
-		cout << "File not found " << aFileName << "\n";
-		exit(1);
+		cout << "Could not open file '" << aFileName << "'\n";
+		return;
 	}
 	
 	string CurrentLine;
