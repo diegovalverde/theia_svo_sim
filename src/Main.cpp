@@ -26,7 +26,7 @@ int main(void)
 #ifndef _WIN32
 
       
-        char * cLine = readline(Prompt.str().c_str());
+        char * cLine = readline(Prompt.c_str());
         if (*cLine)
                 add_history(cLine);
         Line = string(cLine);
