@@ -118,6 +118,9 @@ string CallBack_Set(vector<string> aArg, CSimulator * aSim )
 //--------------------------------------------------------------------------------------------
 string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
 {
+	if (aArg.size() != 0)
+		return "invalid number of arguments";
+
 	aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
 	return "Voxelization complete";
 }
@@ -160,7 +163,7 @@ CSimulator::~CSimulator()
 string CSimulator::ExecuteCommand(vector<string> aArguments)
 {
 	if (aArguments.size() < 1)
-		return  "Invalid command line size";
+		return  "\n";
 
 	string Command = aArguments[0];
 	aArguments.erase( aArguments.begin() );
