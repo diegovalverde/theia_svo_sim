@@ -70,21 +70,23 @@ string CallBack_Show(vector<string> aArg, CSimulator * aSim )
 	string Type = aArg[0];
 	if (Type == "config")
 	{
-		oss << "Camera.Position = (" 
+		oss << "Camera.Position            = (" 
 			<< aSim->Scene.Camera.Position.x << " , "  
 			<< aSim->Scene.Camera.Position.y << " , "  
-			<< aSim->Scene.Camera.Position.z << " , )\n\n"; 
+			<< aSim->Scene.Camera.Position.z << " , )\n"; 
 
-		oss << "Camera.Direction = (" 
+		oss << "Camera.Direction           = (" 
 			<< aSim->Scene.Camera.Direction.x << " , "  
 			<< aSim->Scene.Camera.Direction.y << " , "  
-			<< aSim->Scene.Camera.Direction.z << " , )\n\n"; 
+			<< aSim->Scene.Camera.Direction.z << " , )\n"; 
 
-		oss << "Camera.EulerRotation = (" 
+		oss << "Camera.EulerRotation       = (" 
 			<< aSim->Scene.Camera.EulerRotation.x << " , "  
 			<< aSim->Scene.Camera.EulerRotation.y << " , "  
-			<< aSim->Scene.Camera.EulerRotation.z << " , )\n\n"; 
+			<< aSim->Scene.Camera.EulerRotation.z << " , )\n"; 
 
+		oss << "Geometry.VertexBuffer.size = " << aSim->Scene.Geometry.VertexBuffer.size() << "\n";
+		oss << "Geometry.FaceBuffer.size   = " << aSim->Scene.Geometry.FaceBuffer.size() << "\n";
 		
 	} else {
 		return "Invalid type '" + Type + "'\n";
@@ -146,7 +148,7 @@ CSimulator::CSimulator()
 	
 	mCommands["load"]		=  CallBack_Load;
 	mCommands["save"]		=  CallBack_Save;
-	mCommands["quit"]		=  CallBack_Exit;
+	mCommands["quit"]		=  mCommands["q"] = CallBack_Exit;
 	mCommands["voxelize"]	=  CallBack_Voxelize;
 	mCommands["render"]		=  CallBack_Render;
 	mCommands["help"]		=  CallBack_Help;
@@ -176,7 +178,7 @@ string CSimulator::ExecuteCommand(vector<string> aArguments)
 //--------------------------------------------------------------------------------------------
 string CSimulator::LoadConfigurationFile( string aFileName  )
 {
-		ifstream ifs( aFileName.c_str() );
+	ifstream ifs( aFileName.c_str() );
 	if (!ifs.good() )
 	  return  aFileName + " : File not found ";
 		
@@ -283,7 +285,7 @@ void CSimulator::Initialize( string aFileName )
 	Gpu.Rgu.Scene = &Scene;
 	Gpu.Rgu.Statistics = &Statistics;
 	Gpu.Gt.Scene = &Scene;
-	LoadConfigurationFile( aFileName );
+	cout << LoadConfigurationFile( aFileName ) << "\n";
 	Scene.Camera.Initialize();
 }
 //--------------------------------------------------------------------------------------------
