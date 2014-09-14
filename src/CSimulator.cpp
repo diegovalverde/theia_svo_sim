@@ -56,9 +56,87 @@ string CallBack_Render(vector<string> aArg, CSimulator * aSim )
 
 
 	aSim->RenderFrame( aArg[0] );
-	return "Render done";
+	return "Render output written into " +  aArg[0] ;
 
 }
+//--------------------------------------------------------------------------------------------
+string CallBack_Show(vector<string> aArg, CSimulator * aSim )
+{
+	string ReturString;
+	ostringstream oss;
+
+	if (aArg.size() != 1)
+		return "invalid number of arguments";
+	string Type = aArg[0];
+	if (Type == "config")
+	{
+		oss << "Camera.Position = (" 
+			<< aSim->Scene.Camera.Position.x << " , "  
+			<< aSim->Scene.Camera.Position.y << " , "  
+			<< aSim->Scene.Camera.Position.z << " , )\n\n"; 
+
+		oss << "Camera.Direction = (" 
+			<< aSim->Scene.Camera.Direction.x << " , "  
+			<< aSim->Scene.Camera.Direction.y << " , "  
+			<< aSim->Scene.Camera.Direction.z << " , )\n\n"; 
+
+		oss << "Camera.EulerRotation = (" 
+			<< aSim->Scene.Camera.EulerRotation.x << " , "  
+			<< aSim->Scene.Camera.EulerRotation.y << " , "  
+			<< aSim->Scene.Camera.EulerRotation.z << " , )\n\n"; 
+
+		
+	} else {
+		return "Invalid type '" + Type + "'\n";
+	}
+
+	return oss.str();
+}
+//--------------------------------------------------------------------------------------------
+string CallBack_Set(vector<string> aArg, CSimulator * aSim )
+{
+	int Value;
+	if (aArg.size() != 3)
+		return "invalid number of arguments";
+
+	string Object = aArg[0];
+	string Attribute = aArg[1];
+	stringstream ss(aArg[2]);
+	 
+	ss >> Value ;
+	if (Object == "octree")
+	{
+		if (Attribute == "depth")
+		{
+			aSim->Scene.OCtree.SetDepth( Value );
+		}
+	} else
+		return "Invalid type '" + Object + "'\n";
+
+	return "Value was set";
+}
+//--------------------------------------------------------------------------------------------
+string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
+{
+	aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
+	return "Voxelization complete";
+}
+//--------------------------------------------------------------------------------------------
+string CallBack_Help(vector<string> aArg, CSimulator * aSim )
+{
+	string Help =
+		"save <octree|projection_plane> <filepath>        : saves specified object\n"
+		"load <config>                                    : loads specified object\n"
+		"show <config>                                    : shows config\n"
+		"render <filepath>                                : renders PPM to specified file\n"
+		"voxelize                                         : Voxelizes currently loaded model\n"
+		"set <octree> <depth> <value>                     : sets values\n"
+		"quit                                             : exits application\n";
+
+	return Help;
+		
+}
+
 //--------------------------------------------------------------------------------------------
 CSimulator::CSimulator()
 {
@@ -66,7 +144,11 @@ CSimulator::CSimulator()
 	mCommands["load"]		=  CallBack_Load;
 	mCommands["save"]		=  CallBack_Save;
 	mCommands["quit"]		=  CallBack_Exit;
+	mCommands["voxelize"]	=  CallBack_Voxelize;
 	mCommands["render"]		=  CallBack_Render;
+	mCommands["help"]		=  CallBack_Help;
+	mCommands["show"]		=  CallBack_Show;
+	mCommands["set"]        =  CallBack_Set;
 
 	
 }
@@ -198,9 +280,7 @@ void CSimulator::Initialize( string aFileName )
 	Gpu.Rgu.Scene = &Scene;
 	Gpu.Rgu.Statistics = &Statistics;
 	Gpu.Gt.Scene = &Scene;
-
-
-
+	LoadConfigurationFile( aFileName );
 	Scene.Camera.Initialize();
 }
 //--------------------------------------------------------------------------------------------
@@ -211,7 +291,7 @@ void CSimulator::RenderFrame( string aFileName )
 	ofs << Scene.ResolutionWidth << " " << Scene.ResolutionHeight << "\n";
 	ofs << "255\n";
 	if (!ofs.good())
-		throw string("Could not open file for writting\n");
+		throw string("Could not open file '" + aFileName + "' for writting\n");
 	
 	for (int j = 0; j < Scene.ResolutionHeight; j++)
 	{

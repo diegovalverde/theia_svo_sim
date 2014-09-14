@@ -9,15 +9,14 @@ int main(void)
 	try
 	{
 	Simulator.Initialize("teapod_svo__depth_4.config");
-	Simulator.LoadConfigurationFile("teapod_svo__depth_4.config");
+	
 	
 	//Simulator.Initialize("suzane_avo__depth_2.config");
 
-	//Simulator.Scene.Camera.WriteProjectionPlaneObj("ProjectionPlane.obj");
-	
+		
 
 	//Populate the OCtree
-	Simulator.Scene.OCtree.Populate( Simulator.Scene.Geometry );
+//	Simulator.Scene.OCtree.Populate( Simulator.Scene.Geometry );
 
 	//Simulator.Scene.OCtree.DumpObjMainBoundingCube( "BoundingCube.obj" );
 
@@ -37,8 +36,6 @@ int main(void)
 	}
 
 	
-	//Simulator.RenderFrame();
-
 	return 0;
 	}
 	catch (string aMessage)

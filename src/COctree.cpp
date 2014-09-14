@@ -94,7 +94,7 @@ void COctree::InitializeRootOctant()
 void COctree::Populate(  CGeometry & aGeometry )
 {
 
-	cout << "Start Populating Otree\n";
+	cout << "Start Otree creation\n";
 	CreateMainBoundigCube();
 
 	InitializeRootOctant();
