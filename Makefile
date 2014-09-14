@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-c -Wall -g -std=c++11  
+CFLAGS=-c -g -std=c++11  
 LDFLAGS=-lreadline -lncurses
 SOURCES = src/CGeometryTraversalUnit.cpp src/COctree.cpp  src/CRayGenerationUnit.cpp  src/CScene.cpp  src/CSimulator.cpp  src/Main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
@@ -9,10 +9,10 @@ EXECUTABLE = bin/$(TARGET)
 all: $(SOURCES) $(TARGET)
 	
 $(TARGET): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $(EXECUTABLE)
+	$(CC) $(OBJECTS) -o $(EXECUTABLE) $(LDFLAGS)
 
 .cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS)  $< -o $@
 
 
 clean:
