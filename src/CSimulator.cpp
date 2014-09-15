@@ -22,7 +22,11 @@ string CallBack_Load(vector<string> aArg, CSimulator * aSim )
 	string FilePath      = aArg[1];
 
 	if (OperationType == "config")
-		return aSim->LoadConfigurationFile(FilePath);
+	{
+		string Out = aSim->LoadConfigurationFile(FilePath);
+		aSim->Scene.Camera.Initialize();
+		return Out;
+	}
 	else
 		return OperationType + " : invalid load type";
 }
@@ -56,6 +60,9 @@ string CallBack_Render(vector<string> aArg, CSimulator * aSim )
 
 
 	aSim->RenderFrame( aArg[0] );
+	#ifndef _WIN32
+		system(string("display " + aArg[0] + " &").c_str());
+	#endif
 	return "Render output written into " +  aArg[0] ;
 
 }
@@ -85,8 +92,11 @@ string CallBack_Show(vector<string> aArg, CSimulator * aSim )
 			<< aSim->Scene.Camera.EulerRotation.y << " , "  
 			<< aSim->Scene.Camera.EulerRotation.z << " , )\n"; 
 
+		oss << "Camera.FocalDistance       = " << aSim->Scene.Camera.FocalDistance << "\n"; 
+
 		oss << "Geometry.VertexBuffer.size = " << aSim->Scene.Geometry.VertexBuffer.size() << "\n";
 		oss << "Geometry.FaceBuffer.size   = " << aSim->Scene.Geometry.FaceBuffer.size() << "\n";
+		
 	}
 	else if (Type == "stat"	)
 	{
