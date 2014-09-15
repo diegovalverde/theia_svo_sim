@@ -1,6 +1,7 @@
 #ifndef COCTREE_H_INCLUDED
 #define COCTREE_H_INCLUDED
 #include "Geometry.h"
+#include "CStatistics.h"
 #include <map>
 
 enum E_OCTANT
@@ -36,6 +37,7 @@ public:
 	vector< CFace<3> > FaceIndexList;
 	CVector Center;
 	CVoxel Voxel;
+	
 };
 //---------------------------------------------------------------------------------------------------------------------
 class COctree
@@ -63,6 +65,7 @@ public:
 
 public:
 	CGeometry					 *  Geometry;
+	CStatistics                  *  Statistics;
 	
 private:
 	CVector GetCenterFromMortonKey( TMortonCode aMortonKey, CVector aParentCenter, float aParentDiameter );

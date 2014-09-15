@@ -1,6 +1,7 @@
 #ifndef STATISTICS_INCLUDED_H
 #define STATISTICS_INCLUDED_H
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -10,45 +11,43 @@ class CStatistics
 public:
 	CStatistics()
 	{
-		TotalTriangleListCount = 0;		
-		AverageTriangleListSize = 0;	
-		AverageOCtantsVisited = 0;
-		TotalRayCount = 0;
-		TotalRayNotIntersectingVoxel = 0;
-	    MaxOCtantVisited = 0;
-	    MinOCtantVisited = 0;
-	    VisitedOctansLessThan40 = 0;
-	    VisitedOctansBetween40And80 = 0;
-	    VisitedOctansBetween80And150 = 0;
-	    VisitedOctansBetween150And200 = 0;
-	    VisitedOctansMoreThan200 = 0;
-		BiggestTriangleListSize = 0;
-		SmallestTriangleListSize = 0;
-		GeometryAccessCount = 0;
+		Stat["TotalTriangleListCount"] = 0;		
+		Stat["AverageTriangleListSize"] = 0;	
+		Stat["AverageOCtantsVisited"] = 0;
+		Stat["TotalRayCount"] = 0;
+		Stat["TotalRayNotIntersectingVoxel"] = 0;
+	    Stat["MaxOCtantVisited"] = 0;
+	    Stat["MinOCtantVisited"] = 0;
+	    Stat["VisitedOctansLessThan40"] = 0;
+	    Stat["VisitedOctansBetween40And80"] = 0;
+	    Stat["VisitedOctansBetween80And150"] = 0;
+	    Stat["VisitedOctansBetween150And200"] = 0;
+	    Stat["VisitedOctansMoreThan200"] = 0;
+		Stat["BiggestTriangleListSize"] = 0;
+		Stat["SmallestTriangleListSize"] = 0;
+		Stat["GeometryAccessCount"] = 0;
 	}
 
 	~CStatistics() {};
 
 public:
-	string Print( void );
+	string Print( void )
+	{
+		ostringstream oss;
+		for (auto I = Stat.begin(); I != Stat.end(); I++)
+		{
+			char Buffer[1024];
+			sprintf(Buffer,"%-50s : %d\n",I->first.c_str(), I->second);
+			oss << Buffer;
+		}
+
+		return oss.str();
+	}
 	void   Clear( void );
 
 public:
-	unsigned long	TotalTriangleListCount;		//How many triangle lists
-	unsigned long	AverageTriangleListSize;	//How big (average triangle lists sizes are)
-	unsigned long	AverageOCtantsVisited;
-	unsigned long   TotalRayCount;
-	unsigned long   TotalRayNotIntersectingVoxel;
-	unsigned int    MaxOCtantVisited;
-	unsigned int    MinOCtantVisited;
-	unsigned int    VisitedOctansLessThan40;
-	unsigned int    VisitedOctansBetween40And80;
-	unsigned int    VisitedOctansBetween80And150;
-	unsigned int    VisitedOctansBetween150And200;
-	unsigned int    VisitedOctansMoreThan200;
-	unsigned int	BiggestTriangleListSize;
-	unsigned int	SmallestTriangleListSize;
-	unsigned long   GeometryAccessCount;
+	map<string, unsigned long long> Stat;
+	
 } ;
 //------------------------------------------------------------------
 #endif

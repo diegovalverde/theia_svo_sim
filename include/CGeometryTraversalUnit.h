@@ -22,10 +22,11 @@ public:
 	TMortonCode Execute( CRay & aRay );		//Calculates intersection and all that stuff
 	string		  DumpState( void );
 	CScene      * Scene;
+	CStatistics * Statistics;
 
 private:
 	bool RayIntersectsVoxel( void );
-	CStatistics * Statistics;
+	
 	
 
 private:
