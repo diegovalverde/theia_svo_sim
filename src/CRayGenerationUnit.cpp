@@ -44,7 +44,7 @@ CRay CRayGenerationUnit::Execute(int aRow, int aColumn )
 	Ray.InvDirection =    CVector(10.f/Ray.Direction.x,10.f/Ray.Direction.y,10.f/Ray.Direction.z);
 
 	
-	Statistics->TotalRayCount++;
+	Statistics->Stat["TotalRayCount"] += 1;
 	return Ray;
 }
 //-------------------------------------------------------------------------------------------

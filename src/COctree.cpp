@@ -94,7 +94,7 @@ void COctree::InitializeRootOctant()
 void COctree::Populate(  CGeometry & aGeometry )
 {
 
-	cout << "Start Otree creation\n";
+	cout << "Start Octree creation\n";
 	CreateMainBoundigCube();
 
 	InitializeRootOctant();
@@ -379,9 +379,13 @@ TMortonCode COctree::GetIntersectedVoxel( TMortonCode aMortonCode,  CRay  aRay )
 
 	if ( Octant[ aMortonCode ].RayIntersection( aRay ) == false )
 		return NULL_MORTON_CODE;
+	
+	Statistics->Stat["MaxOCtantVisited"] += 1;
 
 	if (Octant[ aMortonCode ].isLeaf)
+	{
 		return aMortonCode;
+	}
 	else
 	{
 		int NextLevel = hibit(aMortonCode << 3)/3;

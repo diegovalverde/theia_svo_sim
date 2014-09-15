@@ -87,7 +87,10 @@ string CallBack_Show(vector<string> aArg, CSimulator * aSim )
 
 		oss << "Geometry.VertexBuffer.size = " << aSim->Scene.Geometry.VertexBuffer.size() << "\n";
 		oss << "Geometry.FaceBuffer.size   = " << aSim->Scene.Geometry.FaceBuffer.size() << "\n";
-		
+	}
+	else if (Type == "stat"	)
+	{
+		return aSim->Statistics.Print();
 	} else {
 		return "Invalid type '" + Type + "'\n";
 	}
@@ -132,7 +135,7 @@ string CallBack_Help(vector<string> aArg, CSimulator * aSim )
 	string Help =
 		"save <octree|projection_plane> <filepath>        : saves specified object\n"
 		"load <config>                                    : loads specified object\n"
-		"show <config>                                    : shows config\n"
+		"show <config|stats>                              : shows config\n"
 		"render <filepath>                                : renders PPM to specified file\n"
 		"voxelize                                         : Voxelizes currently loaded model\n"
 		"set <octree> <depth> <value>                     : sets values\n"
@@ -287,6 +290,8 @@ void CSimulator::Initialize( string aFileName )
 	Gpu.Rgu.Scene = &Scene;
 	Gpu.Rgu.Statistics = &Statistics;
 	Gpu.Gt.Scene = &Scene;
+	Gpu.Gt.Statistics = &Statistics;
+	Gpu.Gt.Scene->OCtree.Statistics = &Statistics;
 	cout << LoadConfigurationFile( aFileName ) << "\n";
 	Scene.Camera.Initialize();
 }
@@ -310,7 +315,7 @@ void CSimulator::RenderFrame( string aFileName )
 
 			if (GtResut == NULL_MORTON_IDX)
 			{
-				Statistics.TotalRayNotIntersectingVoxel++;
+				Statistics.Stat["TotalRayNotIntersectingVoxel"] += 1;
 				ofs << " 0 0 0\n";	
 			} else {
 				cout << ".";
