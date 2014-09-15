@@ -37,7 +37,7 @@ public:
 		for (auto I = Stat.begin(); I != Stat.end(); I++)
 		{
 			char Buffer[1024];
-			sprintf(Buffer,"%-50s : %d\n",I->first.c_str(), I->second);
+			sprintf(Buffer,"%-50s : %llu\n",I->first.c_str(), I->second);
 			oss << Buffer;
 		}
 
