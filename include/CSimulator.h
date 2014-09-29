@@ -38,6 +38,7 @@ public:
 	
 	CStatistics		Statistics;
 	void			Initialize( string aFileName );
+	void			Initialize( void );
 	string          LoadConfigurationFile( string aFileName );
 	string          ExecuteCommand(vector<string> aCommands);
 public:

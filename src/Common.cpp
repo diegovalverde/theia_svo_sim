@@ -1,4 +1,5 @@
 #include "../include/Common.h"
+#include <math.h>
 //-------------------------------------------------------------------------------------------------------------
 int GetHighestBitIndex(unsigned int n) 
 {

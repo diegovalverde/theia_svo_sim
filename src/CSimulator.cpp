@@ -384,6 +384,13 @@ void CSimulator::Initialize( string aFileName )
 	Scene.Camera.Initialize();
 }
 //--------------------------------------------------------------------------------------------
+void CSimulator::Initialize(  )
+{
+	Gpu.Initialialize( &Statistics, &Scene );
+
+;
+}
+//--------------------------------------------------------------------------------------------
 void CSimulator::OpenRenderFile( ofstream & ofs )
 {
 

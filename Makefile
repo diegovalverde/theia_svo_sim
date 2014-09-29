@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-c -g -std=c++11  
 LDFLAGS=-lreadline -lncurses
-SOURCES = src/CGeometryTraversalUnit.cpp src/COctree.cpp  src/CRayGenerationUnit.cpp  src/CScene.cpp  src/CSimulator.cpp  src/Main.cpp
+SOURCES = src/CGeometryTraversalUnit.cpp src/CMemory.cpp src/Common.cpp src/CGpu.cpp src/COctree.cpp  src/CRayGenerationUnit.cpp  src/CScene.cpp  src/CSimulator.cpp  src/Main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 TARGET  = theia_sim
 EXECUTABLE = bin/$(TARGET)

@@ -12,9 +12,13 @@ int main(void)
 {
 	try
 	{
+		
+
 #ifdef _WIN32
 	//Shorcut for VS210 path
 	Simulator.Initialize("teapod_svo__depth_4.config");
+#else
+	Simulator.Initialize();	
 #endif	
 	
 	//Simulator.Initialize("suzane_avo__depth_2.config");
