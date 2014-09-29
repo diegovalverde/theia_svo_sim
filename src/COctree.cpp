@@ -366,6 +366,15 @@ bool COctant::RayIntersection( CRay aRay )
     return true;
 }
 //------------------------------------------------------------------------------------------------
+COctant  COctree::GetOCtant( TMortonCode aMortonCode )
+{
+	if (Octant.find( aMortonCode ) == Octant.end())
+		throw string( "OCtant not found\n ");
+
+	return Octant[aMortonCode];
+
+}
+//------------------------------------------------------------------------------------------------
 TMortonCode COctree::GetIntersectedVoxel( TMortonCode aMortonCode,  CRay  aRay )
 {
   

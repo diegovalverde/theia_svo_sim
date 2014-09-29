@@ -3,12 +3,13 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <vector>
 using namespace std;
 #define PI 3.14159265359
 
 
 #define LOG(aMsg) cout << __FUNCTION__ << " : " << aMsg << "\n";
-
+int GetHighestBitIndex(unsigned int n) ;
 //-----------------------------------------------------------------------
 inline void Tokenize(const string& str,
                       vector<string>& tokens,

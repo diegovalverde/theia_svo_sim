@@ -1,3 +1,6 @@
+#ifndef RAYGENUNIT_H_INCLUDED
+#define RAYGENUNIT_H_INCLUDED
+
 #include "Geometry.h"
 #include "../include/CCamera.h"
 #include "../include/CStatistics.h"
@@ -22,3 +25,7 @@ private:
 	
 };
 //------------------------------------------------------------------
+
+#endif
+
+

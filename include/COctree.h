@@ -57,6 +57,7 @@ public:
 public:
 	void	Populate( CGeometry & aGeometry );
 	void	Save(string aPath );								///Save the OCtree as a OBJ file
+	COctant GetOCtant( TMortonCode aMortonCode );
 	void	DumpObjMainBoundingCube( string aFilePath );
 	void	DumpWireFrame( string aFilePath, TDumpType aDumpType );
 	void    SetDepth(int aDepth ) { mMaxDepth = aDepth ;}
@@ -67,7 +68,7 @@ public:
 	CGeometry					 *  Geometry;
 	CStatistics                  *  Statistics;
 	
-private:
+public:
 	CVector GetCenterFromMortonKey( TMortonCode aMortonKey, CVector aParentCenter, float aParentDiameter );
 	void CreateMainBoundigCube();
 	void CreateOctant( CVector aCenter,double aParentEdgeLen,  TMortonCode aMortonCode );

@@ -26,6 +26,7 @@ public:
 		Stat["BiggestTriangleListSize"] = 0;
 		Stat["SmallestTriangleListSize"] = 0;
 		Stat["GeometryAccessCount"] = 0;
+		
 	}
 
 	~CStatistics() {};

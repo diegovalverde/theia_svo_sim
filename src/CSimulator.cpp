@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <bitset>
 
 
-#define NULL_MORTON_IDX 0
 
 
 //--------------------------------------------------------------------------------------------
@@ -55,15 +55,26 @@ string CallBack_Save(vector<string> aArg, CSimulator * aSim )
 //--------------------------------------------------------------------------------------------
 string CallBack_Render(vector<string> aArg, CSimulator * aSim )
 {
-	if (aArg.size() != 1)
+	if (aArg.size() != 2)
 		return "invalid number of arguments";
 
+	if (aSim->mVoxelizationDone == false)
+		return "Vozelization not yet performed. Please run the 'voxelize'command first";
 
-	aSim->RenderFrame( aArg[0] );
+	E_RENDER_TYPE RenderType;
+
+	map<string,E_RENDER_TYPE> strRenderType;
+	strRenderType["hw"] = RENDER_HW;
+	strRenderType["sw"] = RENDER_SW_PURE;
+
+	if (strRenderType.find( aArg[1] ) == strRenderType.end())
+		return "Invalid render type";
+
+	aSim->RenderFrame( aArg[0], strRenderType[aArg[1] ] );
 	#ifndef _WIN32
 		system(string("display " + aArg[0] + " &").c_str());
 	#endif
-	return "Render output written into " +  aArg[0] ;
+	return "\nRender output written into " +  aArg[0] ;
 
 }
 //--------------------------------------------------------------------------------------------
@@ -125,7 +136,20 @@ string CallBack_Set(vector<string> aArg, CSimulator * aSim )
 		{
 			aSim->Scene.OCtree.SetDepth( Value );
 		}
-	} else
+	} 
+	else if (Object == "cache")
+	{
+		if (Attribute == "enable")
+		{
+			if (aArg[2] == "true")
+				aSim->Gpu.Memory.mBypassCache = false;
+			else if (aArg[2] == "false")
+				aSim->Gpu.Memory.mBypassCache = true;
+			else
+				return "This attribute only accepts true or false";
+		}
+	}
+	else
 		return "Invalid type '" + Object + "'\n";
 
 	return "Value was set";
@@ -137,6 +161,61 @@ string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
 		return "invalid number of arguments";
 
 	aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
+	aSim->mVoxelizationDone = true;
+
+	aSim->Gpu.Memory.Initialize( aSim->Scene.OCtree.mMaxDepth, 64 );
+
+	//Ok, now initialize the GPU memory
+	cout << "Writting back GPU memory hierarchy\n";
+
+	for (auto O = aSim->Scene.OCtree.Octant.begin(); O != aSim->Scene.OCtree.Octant.end(); O++)
+	{
+		TMortonCode ParentMortonCode = O->first;
+		int WriteAddress = ParentMortonCode;	//Write address is Morton code belonging to parent
+		bitset<16> WriteData;
+
+		int BitPosition = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			TMortonCode ChildMortonCode = ((ParentMortonCode << 3) + i);
+			if (aSim->Scene.OCtree.Octant.find( ChildMortonCode ) == aSim->Scene.OCtree.Octant.end())
+			{
+				BitPosition += 2;
+				continue;
+			}
+
+			COctant OCtant = aSim->Scene.OCtree.GetOCtant( ChildMortonCode );
+			/*
+			EMPTY,		
+			LEAF,
+			NON_EMPTY,
+			RESERVED
+			*/
+
+			if (OCtant.isEmpty)
+			{
+			
+				WriteData[BitPosition]   = 0;
+				WriteData[BitPosition+1] = 0;
+				
+			} 
+			else if (OCtant.isLeaf)
+			{
+				WriteData[BitPosition]   = 1;
+				WriteData[BitPosition+1] = 0;
+
+			} else {
+
+				WriteData[BitPosition]   = 0;
+				WriteData[BitPosition+1] = 1;
+			}
+			BitPosition += 2;
+		}
+		aSim->Gpu.Memory.Write( WriteAddress, WriteData.to_ulong() ); 
+		
+	}
+	
+
 	return "Voxelization complete";
 }
 //--------------------------------------------------------------------------------------------
@@ -148,7 +227,7 @@ string CallBack_Help(vector<string> aArg, CSimulator * aSim )
 		"show <config|stats>                              : shows config\n"
 		"render <filepath>                                : renders PPM to specified file\n"
 		"voxelize                                         : Voxelizes currently loaded model\n"
-		"set <octree> <depth> <value>                     : sets values\n"
+		"set <octree|cache> <attribute> <value>           : sets values\n"
 		"quit                                             : exits application\n";
 
 	return Help;
@@ -168,7 +247,7 @@ CSimulator::CSimulator()
 	mCommands["show"]		=  CallBack_Show;
 	mCommands["set"]        =  CallBack_Set;
 
-	
+	mVoxelizationDone = false;
 }
 //--------------------------------------------------------------------------------------------
 CSimulator::~CSimulator()
@@ -291,30 +370,36 @@ string CSimulator::LoadConfigurationFile( string aFileName  )
 
 
 	}//while
+	mVoxelizationDone = false;
 
 	return "File Loaded";
 }
 //--------------------------------------------------------------------------------------------
 void CSimulator::Initialize( string aFileName )
 {
-	Gpu.Rgu.Scene = &Scene;
-	Gpu.Rgu.Statistics = &Statistics;
-	Gpu.Gt.Scene = &Scene;
-	Gpu.Gt.Statistics = &Statistics;
-	Gpu.Gt.Scene->OCtree.Statistics = &Statistics;
+	Gpu.Initialialize( &Statistics, &Scene );
+
+
 	cout << LoadConfigurationFile( aFileName ) << "\n";
 	Scene.Camera.Initialize();
 }
 //--------------------------------------------------------------------------------------------
-void CSimulator::RenderFrame( string aFileName )
+void CSimulator::OpenRenderFile( ofstream & ofs )
 {
-	ofstream ofs(aFileName.c_str());
+
 	ofs << "P3\n";
 	ofs << Scene.ResolutionWidth << " " << Scene.ResolutionHeight << "\n";
 	ofs << "255\n";
-	if (!ofs.good())
-		throw string("Could not open file '" + aFileName + "' for writting\n");
 	
+}
+//--------------------------------------------------------------------------------------------
+void CSimulator::CloseRenderFile( ofstream & ofs )
+{
+	ofs.close();
+}
+//--------------------------------------------------------------------------------------------
+void CSimulator::RenderSwFast( ofstream & ofs )
+{
 	for (int j = 0; j < Scene.ResolutionHeight; j++)
 	{
 		
@@ -334,7 +419,34 @@ void CSimulator::RenderFrame( string aFileName )
 			}
 		}
 	}
+}
+//--------------------------------------------------------------------------------------------
+void CSimulator::RenderHw( ofstream & ofs )
+{
+	Gpu.Execute(  Scene.ResolutionWidth, Scene.ResolutionHeight, ofs );
+}
+//--------------------------------------------------------------------------------------------
+void CSimulator::RenderFrame( string aFileName, E_RENDER_TYPE aRenderType )
+{
 
-	ofs.close();
+	ofstream ofs(aFileName.c_str());
+	if (!ofs.good())
+		throw string("Could not open file '" + aFileName + "' for writting\n");
+
+	OpenRenderFile(ofs );
+
+	switch (aRenderType)
+	{
+	case RENDER_SW_PURE:
+		RenderSwFast( ofs );
+		break;
+	case RENDER_HW:
+		RenderHw( ofs );
+		break;
+	}
+	
+
+	CloseRenderFile( ofs );
+
 }
 //--------------------------------------------------------------------------------------------

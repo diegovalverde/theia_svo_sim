@@ -13,24 +13,16 @@ using namespace std;
 #include "../include/CStatistics.h"
 #include "../include/CRayGenertionUnit.h"
 #include "../include/CGeometryTraversalUnit.h"
+#include "../include/CMemory.h"
+#include "../include/CGpu.h"
 
+#define NULL_MORTON_IDX 0
 
-
-//------------------------------------------------------------------
-class CGpu
+enum E_RENDER_TYPE
 {
-public:
-	CGpu(){};
-	~CGpu(){Statistics = NULL; };
-
-	void Execute( void );
-	void  Initialialize( void );
-
-public:
-	CRayGenerationUnit				 Rgu;
-	CGeometryTraversalUnit           Gt;
-	CStatistics				*        Statistics;
-	
+	RENDER_HW_NAIVE,
+	RENDER_SW_PURE,
+	RENDER_HW
 };
 //------------------------------------------------------------------
 class CSimulator
@@ -49,11 +41,19 @@ public:
 	string          LoadConfigurationFile( string aFileName );
 	string          ExecuteCommand(vector<string> aCommands);
 public:
-	void RenderFrame( string aFileName );
+	void RenderFrame( string aFileName, E_RENDER_TYPE aRenderType );
+	void RenderSwFast( ofstream & ofs );
+	void RenderHw( ofstream & ofs );
+	void RenderNaive( ofstream & ofs );
+
 	CScene Scene;
 	CGpu   Gpu;
-
+public:
+	bool mVoxelizationDone;
 private:
+	void OpenRenderFile( ofstream & ifs );
+	void CloseRenderFile( ofstream & ifs );
+
 	bool mRunning;
 	map<string, TCommand> mCommands;
 
