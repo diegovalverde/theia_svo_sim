@@ -11,21 +11,14 @@ class CStatistics
 public:
 	CStatistics()
 	{
-		Stat["TotalTriangleListCount"] = 0;		
-		Stat["AverageTriangleListSize"] = 0;	
-		Stat["AverageOCtantsVisited"] = 0;
-		Stat["TotalRayCount"] = 0;
-		Stat["TotalRayNotIntersectingVoxel"] = 0;
-	    Stat["MaxOCtantVisited"] = 0;
-	    Stat["MinOCtantVisited"] = 0;
-	    Stat["VisitedOctansLessThan40"] = 0;
-	    Stat["VisitedOctansBetween40And80"] = 0;
-	    Stat["VisitedOctansBetween80And150"] = 0;
-	    Stat["VisitedOctansBetween150And200"] = 0;
-	    Stat["VisitedOctansMoreThan200"] = 0;
-		Stat["BiggestTriangleListSize"] = 0;
-		Stat["SmallestTriangleListSize"] = 0;
-		Stat["GeometryAccessCount"] = 0;
+		
+
+		//Stat["gpu.average_octants_visited_per_ray"]       = 0;
+		Stat["gpu.total_ray_not_intersecting_any_voxel"] = 0;
+		Stat["gpu.rpu.ray_count"]                        = 0;
+		Stat["mem.external.read_access_count"]           = 0;
+		Stat["mem.cache.l1.hit_count"]                   = 0;
+		Stat["mem.cache.l1.miss_count"]                  = 0;
 		
 	}
 
@@ -44,7 +37,11 @@ public:
 
 		return oss.str();
 	}
-	void   Clear( void );
+	void   Clear( void )
+	{
+		for (auto I = Stat.begin(); I != Stat.end(); I++)
+			I->second = 0;
+	}
 
 public:
 	map<string, unsigned long long> Stat;

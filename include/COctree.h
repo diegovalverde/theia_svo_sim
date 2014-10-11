@@ -2,6 +2,7 @@
 #define COCTREE_H_INCLUDED
 #include "Geometry.h"
 #include "CStatistics.h"
+#include "CGenericObject.h"
 #include <map>
 
 enum E_OCTANT
@@ -17,7 +18,7 @@ enum E_OCTANT
 };
 
 //---------------------------------------------------------------------------------------------------------------------
-class COctant
+class COctant : public CGenericObject
 {
 public:
 	COctant() {  isEmpty= true; isLeaf = false; }
@@ -40,10 +41,10 @@ public:
 	
 };
 //---------------------------------------------------------------------------------------------------------------------
-class COctree
+class COctree : public CGenericObject
 {
 public:
-	COctree() { mMaxDepth = 2; }
+	COctree() {mParameter["depth"] = 2; }
 	~COctree() {}
 
 	enum TDumpType
@@ -60,7 +61,8 @@ public:
 	COctant GetOCtant( TMortonCode aMortonCode );
 	void	DumpObjMainBoundingCube( string aFilePath );
 	void	DumpWireFrame( string aFilePath, TDumpType aDumpType );
-	void    SetDepth(int aDepth ) { mMaxDepth = aDepth ;}
+	
+
 	TMortonCode  GetIntersectedVoxel(TMortonCode aMortonCode,  CRay  aRay );
 	void   InitializeRootOctant();
 
@@ -72,7 +74,6 @@ public:
 	CVector GetCenterFromMortonKey( TMortonCode aMortonKey, CVector aParentCenter, float aParentDiameter );
 	void CreateMainBoundigCube();
 	void CreateOctant( CVector aCenter,double aParentEdgeLen,  TMortonCode aMortonCode );
-	int  mMaxDepth;
 	double VoxelEdgeLen;
 	CVector	MinVertex,MaxVertex;
 	map<TMortonCode,COctant> Octant;

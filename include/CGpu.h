@@ -14,23 +14,25 @@ using namespace std;
 #include "../include/CRayGenertionUnit.h"
 #include "../include/CGeometryTraversalUnit.h"
 #include "../include/CMemory.h"
-
+#include "CGenericObject.h"
 
 //------------------------------------------------------------------
-class CGpu
+class CGpu : public CGenericObject
 {
 public:
-	CGpu(){};
+	CGpu();
 	~CGpu(){Statistics = NULL; };
 
-	void Execute( int aRow, int aCol, ofstream & ofs );
+	void Execute( ofstream & ofs );
 	void  Initialialize( CStatistics * aStatistics, CScene * aScene );  
-
+	int   GetAssignedGt( int aRow, int aCol );
 public:
 	CRayGenerationUnit				 Rgu;
-	CGeometryTraversalUnit           Gt;
+	vector<CGeometryTraversalUnit>   Gt;
 	CStatistics				*        Statistics;
+	CScene                  *        mScene;
 	CMemory                          Memory;
+
 	
 };
 //------------------------------------------------------------------

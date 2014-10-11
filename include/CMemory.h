@@ -2,10 +2,11 @@
 #define MEMORY_H_INCLUDED
 #include "Geometry.h"
 #include "CStatistics.h"
+#include "CGenericObject.h"
 
 typedef unsigned int WORD32;
 //----------------------------------------------------------------------------------------------
-class CMemory
+class CMemory : public CGenericObject
 {
 public:
 	CMemory();
@@ -59,7 +60,7 @@ public:
 	CStatistics                  *  Statistics;
 
 	bool mValidateCacheData;
-	bool mBypassCache;
+//	bool mBypassCache;
 };
 //----------------------------------------------------------------------------------------------
 #endif

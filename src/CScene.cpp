@@ -12,8 +12,10 @@ CScene::CScene()
 {
 	mInitialized		= false;
 	mIsVoxelFileLoaded	= false;
-	ResolutionWidth     = 0;
-	ResolutionHeight    = 0;
+	mParameter["resolution-width"] = 0;
+	mParameter["resolution-height"] = 0;
+
+	mObjects["octree"] = (CGenericObject*)&OCtree;
 
 	OCtree.Geometry = &Geometry;
 }
@@ -25,8 +27,8 @@ void CScene::PopulateOctree()
 //----------------------------------------------------------------------------------
 void CScene::Initailize( int aResolutionWidth, int aResolutionHeight )
 {
-	ResolutionHeight = aResolutionHeight;
-	ResolutionWidth  = aResolutionWidth;
+	mParameter["resolution-height"]  = aResolutionHeight;
+	mParameter["resolution-width"]   = aResolutionWidth;
 
 	mInitialized = true;
 }

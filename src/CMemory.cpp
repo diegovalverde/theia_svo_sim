@@ -5,8 +5,11 @@
 //---------------------------------------------------------------------------------------------
 CMemory::CMemory()
 {
-	mValidateCacheData = true;
-	mBypassCache       = false;
+	//mValidateCacheData = true;
+	
+
+	mParameter["cache-enabled"] = 1;
+	mParameter["validate-cache-data"] = 1;
 }
 //---------------------------------------------------------------------------------------------
 void CMemory::Initialize( int aTreeDepth, int aLinesPerCache )
@@ -25,16 +28,24 @@ void CMemory::Write( TMortonCode aAddress, unsigned long aData )
 	mMainBuffer[ aAddress ] = aData;
 }
 //---------------------------------------------------------------------------------------------
+
+static map<WORD32,bool> LastAddr;
 double CMemory::Read( TAddress aAddress )
 {
 	unsigned int Data;
 
-	if (mBypassCache)
+	if (mParameter["cache-enabled"] == 0)
 	{
-		Statistics->Stat["GeometryAccessCount"] += 1;
+		Statistics->Stat["mem.external.read_access_count"] += 1;
 		return mMainBuffer[aAddress.LogicAddr];
 	}
 
+
+	/*
+	if (LastAddr.find(aAddress.LogicAddr) == LastAddr.end())
+		LastAddr[aAddress.LogicAddr] = true;
+	else
+		cout << "AHA!!\n";*/
 
 	bool Hit = false;
 	//See which of the caches has the data
@@ -53,16 +64,20 @@ double CMemory::Read( TAddress aAddress )
 	{
 
 		//Optional test to make sure that whatever it is that we read is in fact valid
-		if (mValidateCacheData)
+		if (mParameter["validate-cache-data"])
 		{
 			unsigned int MainBufferData = mMainBuffer[aAddress.LogicAddr];
 			if (Data != MainBufferData)
 				cout << "Invalid data read from cache\n";
 		
 		}
-
+		Statistics->Stat["mem.cache.l1.hit_count"] += 1;
+		
 		return Data;
 	} else {
+		//We got a cache miss, let's account for that
+		Statistics->Stat["mem.cache.l1.miss_count"] += 1;
+
 		//The cache line size is 2 16bit blocks. You can only write the *entire* line,
 		//you can not write a single block of the line but *all* of the blocks.
 		//This is because you have a single valid bit per line, this is, either all blocks are
@@ -86,7 +101,7 @@ double CMemory::Read( TAddress aAddress )
 		return Data;
 	}*/
 
-	Statistics->Stat["GeometryAccessCount"] += 1;
+	Statistics->Stat["mem.external.read_access_count"] += 1;
 	return mMainBuffer[aAddress.LogicAddr];
 
 };
@@ -103,6 +118,7 @@ void CMemory::CCache::Initialize(int aDepth, int aBlocksPerLine )
 bool CMemory::CCache::Read(  CMemory::TAddress aAddress, unsigned int & aData )
 {
 	TCacheAddress Address =  aAddress.CacheAddr;
+	Address.Tag = aAddress.LogicAddr;
 	
 	CacheLine Line = mLines[ Address.Index % mLines.size() ];
 	if (Line.Valid == false)

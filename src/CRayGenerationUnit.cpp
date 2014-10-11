@@ -13,8 +13,11 @@ CRayGenerationUnit::~CRayGenerationUnit()
 //-------------------------------------------------------------------------------------------
 CVector CRayGenerationUnit::GetPlanePoint( int aRow , int aColumn )
 {
-	float NormalizedRow   = (float) (((float)aRow    / Scene->ResolutionWidth ) - 0.5f);
-	float NormalizedColum = (float) (((float)aColumn / Scene->ResolutionHeight) - 0.5f);
+	int ResolutionWidth  = Scene->mParameter["resolution-width"];
+	int ResolutionHeight = Scene->mParameter["resolution-height"];
+
+	float NormalizedRow   = (float) (((float)aRow    / ResolutionWidth ) - 0.5f);
+	float NormalizedColum = (float) (((float)aColumn / ResolutionHeight) - 0.5f);
 
 	  CVector Temp_i((NormalizedRow   * Scene->Camera.Right.x), (NormalizedRow   * Scene->Camera.Right.y) ,(NormalizedRow   * Scene->Camera.Right.z ));
 	  CVector Temp_j((NormalizedColum * Scene->Camera.Up.x   ), (NormalizedColum * Scene->Camera.Up.y   ) ,(NormalizedColum * Scene->Camera.Up.z    ));
@@ -44,7 +47,7 @@ CRay CRayGenerationUnit::Execute(int aRow, int aColumn )
 	Ray.InvDirection =    CVector(10.f/Ray.Direction.x,10.f/Ray.Direction.y,10.f/Ray.Direction.z);
 
 	
-	Statistics->Stat["TotalRayCount"] += 1;
+	Statistics->Stat["gpu.rpu.ray_count"] += 1;
 	return Ray;
 }
 //-------------------------------------------------------------------------------------------

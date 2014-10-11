@@ -51,9 +51,9 @@ TMortonCode CGeometryTraversalUnit::Execute( CRay & aRay, TMortonCode aCurrentMo
 		return NULL_MORTON_CODE;
 
 
-	//Step 1: Are a Leaf? We have children?
+	//Step 1: Are we a Leaf? We have children?
 	int NextLevel = (GetHighestBitIndex(aCurrentMortonCode << 3) + 1)/3;
-	if (NextLevel > Scene->OCtree.mMaxDepth)
+	if (NextLevel > Scene->OCtree.mParameter["depth"])
 		return IntersectedMortonCode;
 
 	

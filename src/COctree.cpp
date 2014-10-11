@@ -66,7 +66,7 @@ void COctree::InitializeRootOctant()
 	Root.MaxVertex = MaxVertex;
 	Root.MinVertex = MinVertex;
 	Root.isEmpty   = false;
-	Root.isLeaf    = (mMaxDepth == 1);
+	Root.isLeaf    = (mParameter["depth"] == 1);
 
 	Root.Lenght =  CVector(MaxVertex - MinVertex).Lenght();
 
@@ -206,13 +206,13 @@ void COctree::CreateOctant( CVector aParentCenter, double aParentDiameter, TMort
 	}
 
 	int Level = hibit(aMortonCode)/3;
-	if (Level == mMaxDepth)
+	if (Level == mParameter["depth"])
 		NewOctant.isLeaf = true;
 
 	Octant[aMortonCode] = NewOctant;
 
 	int NextLevel = hibit(aMortonCode << 3)/3;
-	if (NextLevel > mMaxDepth)
+	if (NextLevel > mParameter["depth"])
 		return;
 
 
@@ -398,7 +398,7 @@ TMortonCode COctree::GetIntersectedVoxel( TMortonCode aMortonCode,  CRay  aRay )
 	else
 	{
 		int NextLevel = hibit(aMortonCode << 3)/3;
-		if (NextLevel > mMaxDepth)
+		if (NextLevel > mParameter["depth"])
 			return IntersectedMortonCode;
 
 		for (int i = 0; i < 8; i++)

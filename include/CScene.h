@@ -3,8 +3,9 @@
 #include "../include/Geometry.h"
 #include "../include/CCamera.h"
 #include "../include/COctree.h"
+#include "../include/CGenericObject.h"
 //---------------------------------------------------------------------------------------------------------------------
-class CScene
+class CScene : public CGenericObject
 {
 
 public:
@@ -25,7 +26,7 @@ public:
 	CGeometry Geometry;
 	COctree	  OCtree;								///The actual octree
 	CCamera   Camera;
-	int       ResolutionWidth, ResolutionHeight;	///Widht and Height of the screen
+//	int       ResolutionWidth, ResolutionHeight;	///Widht and Height of the screen
 
 private:
 	bool	mInitialized;

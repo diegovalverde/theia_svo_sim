@@ -58,10 +58,10 @@ string CallBack_Render(vector<string> aArg, CSimulator * aSim )
 	if (aArg.size() != 2)
 		return "invalid number of arguments";
 
-	if (aSim->mVoxelizationDone == false)
+	if (aSim->mParameter["voxels-created"] == 0)
 		return "Vozelization not yet performed. Please run the 'voxelize'command first";
 
-	E_RENDER_TYPE RenderType;
+	
 
 	map<string,E_RENDER_TYPE> strRenderType;
 	strRenderType["hw"] = RENDER_HW;
@@ -119,40 +119,57 @@ string CallBack_Show(vector<string> aArg, CSimulator * aSim )
 	return oss.str();
 }
 //--------------------------------------------------------------------------------------------
-string CallBack_Set(vector<string> aArg, CSimulator * aSim )
+string CallBack_PrintObject(vector<string> aArg, CSimulator * aSim )
 {
-	int Value;
-	if (aArg.size() != 3)
+		if (aArg.size() != 1)
 		return "invalid number of arguments";
 
-	string Object = aArg[0];
-	string Attribute = aArg[1];
-	stringstream ss(aArg[2]);
-	 
-	ss >> Value ;
-	if (Object == "octree")
-	{
-		if (Attribute == "depth")
-		{
-			aSim->Scene.OCtree.SetDepth( Value );
-		}
-	} 
-	else if (Object == "cache")
-	{
-		if (Attribute == "enable")
-		{
-			if (aArg[2] == "true")
-				aSim->Gpu.Memory.mBypassCache = false;
-			else if (aArg[2] == "false")
-				aSim->Gpu.Memory.mBypassCache = true;
-			else
-				return "This attribute only accepts true or false";
-		}
-	}
-	else
-		return "Invalid type '" + Object + "'\n";
+		string Object = aArg[0];
+		if (Object == "simulator")
+			return aSim->PrintObjects( );
+		else if (aSim->mObjects.find(Object) == aSim->mObjects.end())
+			return "invalid object " +  Object;
 
+		return aSim->mObjects[ Object ]->PrintObjects( );
+}
+//--------------------------------------------------------------------------------------------
+string CallBack_Set(vector<string> aArg, CSimulator * aSim )
+{
+try
+{
+	if (aArg.size() != 2)
+		return "invalid number of arguments";
+
+
+	string Object = aArg[0];
+	string Parameter = aArg[0];
+	int Value = StringToInt( aArg[1] );
+
+	int pos = 0;
+	if ((pos = Object.find(".")) == string::npos)
+		return "Incorrect syntax";
+
+	Object.erase(pos,string::npos);
+	Parameter.erase(0,pos+1);
+	
+	if (Object == "simulator")
+	{
+		aSim->SetParameter( Parameter, Value );
+		return "Value was set";
+	}
+	else if (aSim->mObjects.find(Object) == aSim->mObjects.end())
+		return "invalid object " +  Object;
+
+	aSim->mObjects[ Object ]->SetParameter( Parameter, Value );
 	return "Value was set";
+}
+
+catch (string Error)
+{
+
+	return Error + "\n";
+}
+
 }
 //--------------------------------------------------------------------------------------------
 string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
@@ -161,9 +178,9 @@ string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
 		return "invalid number of arguments";
 
 	aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
-	aSim->mVoxelizationDone = true;
+	aSim->mParameter["voxels-created"] = 1;
 
-	aSim->Gpu.Memory.Initialize( aSim->Scene.OCtree.mMaxDepth, 64 );
+	aSim->Gpu.Memory.Initialize( aSim->Scene.OCtree.mParameter["depth"], 64 );
 
 	//Ok, now initialize the GPU memory
 	cout << "Writting back GPU memory hierarchy\n";
@@ -246,8 +263,14 @@ CSimulator::CSimulator()
 	mCommands["help"]		=  CallBack_Help;
 	mCommands["show"]		=  CallBack_Show;
 	mCommands["set"]        =  CallBack_Set;
+	mCommands["print"]      =  CallBack_PrintObject;
 
-	mVoxelizationDone = false;
+	mObjects["gpu"]   = (CGenericObject*)&Gpu;
+	mObjects["scene"] = (CGenericObject*)&Scene;
+	
+
+	
+	mParameter["voxels-created"] = 0;
 }
 //--------------------------------------------------------------------------------------------
 CSimulator::~CSimulator()
@@ -307,7 +330,7 @@ string CSimulator::LoadConfigurationFile( string aFileName  )
 
 		if (TokenType == "Scene.OctreeDepth")
 		{
-			Scene.OCtree.SetDepth( StringToInt( Tokens[1] ));
+			Scene.OCtree.SetParameter( "depth",StringToInt( Tokens[1] ));
 			continue;
 		}
 
@@ -315,13 +338,13 @@ string CSimulator::LoadConfigurationFile( string aFileName  )
 		if (TokenType == "Scene.Width" )
 		{
 			
-			Scene.ResolutionWidth = StringToInt( Tokens[1] );
+			Scene.SetParameter("resolution-width",StringToInt( Tokens[1] ));
 			continue;
 		}
 
 		if (TokenType == "Scene.Height" )
 		{
-			Scene.ResolutionHeight = StringToInt( Tokens[1] );
+			Scene.SetParameter("resolution-height",StringToInt( Tokens[1] ));
 			continue;
 		}
 
@@ -370,7 +393,7 @@ string CSimulator::LoadConfigurationFile( string aFileName  )
 
 
 	}//while
-	mVoxelizationDone = false;
+	mParameter["voxels-created"] = 0;
 
 	return "File Loaded";
 }
@@ -395,7 +418,7 @@ void CSimulator::OpenRenderFile( ofstream & ofs )
 {
 
 	ofs << "P3\n";
-	ofs << Scene.ResolutionWidth << " " << Scene.ResolutionHeight << "\n";
+	ofs << Scene.mParameter["resolution-width"] << " " << Scene.mParameter["resolution-height"] << "\n";
 	ofs << "255\n";
 	
 }
@@ -407,17 +430,21 @@ void CSimulator::CloseRenderFile( ofstream & ofs )
 //--------------------------------------------------------------------------------------------
 void CSimulator::RenderSwFast( ofstream & ofs )
 {
-	for (int j = 0; j < Scene.ResolutionHeight; j++)
+	int ResolutionWidth  = Scene.mParameter["resolution-width"];
+	int ResolutionHeight = Scene.mParameter["resolution-height"];
+
+	for (int j = 0; j < ResolutionHeight; j++)
 	{
 		
-		for (int i = 0; i < Scene.ResolutionWidth; i++)
+		for (int i = 0; i < ResolutionWidth; i++)
 		{
+			
 			CRay Ray =  Gpu.Rgu.Execute( i,j );
-			TMortonCode  GtResut = Gpu.Gt.Execute( Ray );
+			TMortonCode  GtResut = Gpu.Gt[0].Execute( Ray );
 
 			if (GtResut == NULL_MORTON_IDX)
 			{
-				Statistics.Stat["TotalRayNotIntersectingVoxel"] += 1;
+				Statistics.Stat["gpu.total_ray_not_intersecting_any_voxel"] += 1;
 				ofs << " 0 0 0\n";	
 			} else {
 				cout << ".";
@@ -430,17 +457,22 @@ void CSimulator::RenderSwFast( ofstream & ofs )
 //--------------------------------------------------------------------------------------------
 void CSimulator::RenderHw( ofstream & ofs )
 {
-	Gpu.Execute(  Scene.ResolutionWidth, Scene.ResolutionHeight, ofs );
+	
+			Gpu.Execute(  ofs );
+		
+	
 }
 //--------------------------------------------------------------------------------------------
 void CSimulator::RenderFrame( string aFileName, E_RENDER_TYPE aRenderType )
 {
-
+	
 	ofstream ofs(aFileName.c_str());
 	if (!ofs.good())
 		throw string("Could not open file '" + aFileName + "' for writting\n");
 
 	OpenRenderFile(ofs );
+
+	Statistics.Clear();
 
 	switch (aRenderType)
 	{

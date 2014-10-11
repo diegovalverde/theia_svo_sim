@@ -15,6 +15,7 @@ using namespace std;
 #include "../include/CGeometryTraversalUnit.h"
 #include "../include/CMemory.h"
 #include "../include/CGpu.h"
+#include "CGenericObject.h"
 
 #define NULL_MORTON_IDX 0
 
@@ -25,7 +26,7 @@ enum E_RENDER_TYPE
 	RENDER_HW
 };
 //------------------------------------------------------------------
-class CSimulator
+class CSimulator : public CGenericObject
 {
 public:
 	CSimulator();
@@ -50,13 +51,16 @@ public:
 	CScene Scene;
 	CGpu   Gpu;
 public:
-	bool mVoxelizationDone;
+	
+
+
 private:
 	void OpenRenderFile( ofstream & ifs );
 	void CloseRenderFile( ofstream & ifs );
 
-	bool mRunning;
+	
 	map<string, TCommand> mCommands;
+	
 
 };
 //------------------------------------------------------------------
