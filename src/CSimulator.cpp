@@ -161,7 +161,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 		throw string("Could not open file");
 	//Do the voxelization first because it takes a lot of time
 	int VoxelLevel[] = {2,4,8,16};
-	for (int v= 0; v < (VoxelLevel[0]/sizeof(int); v++ )
+	for (int v= 0; v < (VoxelLevel[0]/sizeof(int)); v++ )
 	{
 		ofs << "\n\n=========================================\n";
 		ofs << "Octree level: " <<  VoxelLevel[v] << "\n";
