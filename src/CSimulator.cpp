@@ -139,9 +139,7 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 //--------------------------------------------------------------------------------------------
 string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 {
-	if (aSim->mParameter["voxels-created"] == 0)
-		return "Vozelization not yet performed. Please run the 'voxelize'command first";
-
+	
 	ExperimentsRan.clear();
 
 
@@ -168,6 +166,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 		ofs << "=========================================\n";
 		aSim->SetParameter("scene.octree.depth", VoxelLevel[v] );
 		aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
+		CallBack_Voxelize(vector<string>(),aSim);
 
 		for (int e = 1; e < (2 << Factors.size())-1; e++)
 		{
