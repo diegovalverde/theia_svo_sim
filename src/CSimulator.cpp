@@ -15,6 +15,70 @@ string CallBack_Exit(vector<string> aArg, CSimulator * aSim )
 	exit(0);
 }
 //--------------------------------------------------------------------------------------------
+string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
+{
+	if (aArg.size() != 0)
+		return "invalid number of arguments";
+
+	aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
+	aSim->mParameter["voxels-created"] = 1;
+
+	aSim->Gpu.Memory.Initialize( aSim->Scene.OCtree.mParameter["depth"], 64 );
+
+	//Ok, now initialize the GPU memory
+	cout << "Writting back GPU memory hierarchy\n";
+
+	for (auto O = aSim->Scene.OCtree.Octant.begin(); O != aSim->Scene.OCtree.Octant.end(); O++)
+	{
+		TMortonCode ParentMortonCode = O->first;
+		int WriteAddress = ParentMortonCode;	//Write address is Morton code belonging to parent
+		bitset<16> WriteData;
+
+		int BitPosition = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			TMortonCode ChildMortonCode = ((ParentMortonCode << 3) + i);
+			if (aSim->Scene.OCtree.Octant.find( ChildMortonCode ) == aSim->Scene.OCtree.Octant.end())
+			{
+				BitPosition += 2;
+				continue;
+			}
+
+			COctant OCtant = aSim->Scene.OCtree.GetOCtant( ChildMortonCode );
+			/*
+			EMPTY,		
+			LEAF,
+			NON_EMPTY,
+			RESERVED
+			*/
+
+			if (OCtant.isEmpty)
+			{
+			
+				WriteData[BitPosition]   = 0;
+				WriteData[BitPosition+1] = 0;
+				
+			} 
+			else if (OCtant.isLeaf)
+			{
+				WriteData[BitPosition]   = 1;
+				WriteData[BitPosition+1] = 0;
+
+			} else {
+
+				WriteData[BitPosition]   = 0;
+				WriteData[BitPosition+1] = 1;
+			}
+			BitPosition += 2;
+		}
+		aSim->Gpu.Memory.Write( WriteAddress, WriteData.to_ulong() ); 
+		
+	}
+	
+
+	return "Voxelization complete";
+}
+//--------------------------------------------------------------------------------------------
 string CallBack_Load(vector<string> aArg, CSimulator * aSim )
 {
 	if (aArg.size() != 2)
@@ -159,13 +223,13 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 		throw string("Could not open file");
 	//Do the voxelization first because it takes a lot of time
 	int VoxelLevel[] = {2,4,8,16};
-	for (int v= 0; v < (VoxelLevel[0]/sizeof(int)); v++ )
+	for (int v= 0; v < (sizeof(VoxelLevel[0])/sizeof(int)); v++ )
 	{
 		ofs << "\n\n=========================================\n";
 		ofs << "Octree level: " <<  VoxelLevel[v] << "\n";
 		ofs << "=========================================\n";
 		aSim->SetParameter("scene.octree.depth", VoxelLevel[v] );
-		aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
+		
 		CallBack_Voxelize(vector<string>(),aSim);
 
 		for (int e = 1; e < (2 << Factors.size())-1; e++)
@@ -272,70 +336,6 @@ catch (string Error)
 	return Error + "\n";
 }
 
-}
-//--------------------------------------------------------------------------------------------
-string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
-{
-	if (aArg.size() != 0)
-		return "invalid number of arguments";
-
-	aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
-	aSim->mParameter["voxels-created"] = 1;
-
-	aSim->Gpu.Memory.Initialize( aSim->Scene.OCtree.mParameter["depth"], 64 );
-
-	//Ok, now initialize the GPU memory
-	cout << "Writting back GPU memory hierarchy\n";
-
-	for (auto O = aSim->Scene.OCtree.Octant.begin(); O != aSim->Scene.OCtree.Octant.end(); O++)
-	{
-		TMortonCode ParentMortonCode = O->first;
-		int WriteAddress = ParentMortonCode;	//Write address is Morton code belonging to parent
-		bitset<16> WriteData;
-
-		int BitPosition = 0;
-		for (int i = 0; i < 8; i++)
-		{
-			TMortonCode ChildMortonCode = ((ParentMortonCode << 3) + i);
-			if (aSim->Scene.OCtree.Octant.find( ChildMortonCode ) == aSim->Scene.OCtree.Octant.end())
-			{
-				BitPosition += 2;
-				continue;
-			}
-
-			COctant OCtant = aSim->Scene.OCtree.GetOCtant( ChildMortonCode );
-			/*
-			EMPTY,		
-			LEAF,
-			NON_EMPTY,
-			RESERVED
-			*/
-
-			if (OCtant.isEmpty)
-			{
-			
-				WriteData[BitPosition]   = 0;
-				WriteData[BitPosition+1] = 0;
-				
-			} 
-			else if (OCtant.isLeaf)
-			{
-				WriteData[BitPosition]   = 1;
-				WriteData[BitPosition+1] = 0;
-
-			} else {
-
-				WriteData[BitPosition]   = 0;
-				WriteData[BitPosition+1] = 1;
-			}
-			BitPosition += 2;
-		}
-		aSim->Gpu.Memory.Write( WriteAddress, WriteData.to_ulong() ); 
-		
-	}
-	
-
-	return "Voxelization complete";
 }
 //--------------------------------------------------------------------------------------------
 string CallBack_Help(vector<string> aArg, CSimulator * aSim )
