@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <bitset>
+#include <algorithm>
 
 
 
@@ -76,6 +77,108 @@ string CallBack_Render(vector<string> aArg, CSimulator * aSim )
 	#endif
 	return "\nRender output written into " +  aArg[0] ;
 
+}
+ 
+map<string,bool> ExperimentsRan;		//Time is precious, use this list to make sure no experiment ran twice
+//--------------------------------------------------------------------------------------------
+void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int aMaxLevels, CSimulator * aSim, ofstream & ofs)
+{
+	string strExperimentsRan;
+	for (int l = 0; l < aMaxLevels; l++)
+	{
+		int Index = 0;
+		for (int r = 0; r < aMaxLevels; r++)
+		{
+			Index = 0;
+			strExperimentsRan = "";
+			for (auto  F = aFactors.begin(); F != aFactors.end(); F++)
+			{
+					
+					if (aBitset[Index] == false)	//This is one of the factor that is kept 'constant'for this run
+					{
+					//	cout  << F->mName << " = "  << F->mLevel[l] << " , ";
+						aSim->SetParameter(F->mName,F->mLevel[l] );
+						ostringstream oss;
+						oss <<  F->mLevel[l] <<  ".";
+						strExperimentsRan += oss.str();
+
+					} else {	//This is the factor that we 'evaluate'. This is, while keeping all other factors constant, run a sim using each level from this factor
+				
+					//	cout  << F->mName << "* = "  << F->mLevel[r] << ", ";
+						aSim->SetParameter(F->mName,F->mLevel[r] );
+						ostringstream oss;
+						oss <<  F->mLevel[r] <<  ".";
+						strExperimentsRan += oss.str();
+					}
+					Index++;
+			}
+				
+				if (ExperimentsRan.find( strExperimentsRan ) == ExperimentsRan.end())
+				{
+					cout << strExperimentsRan << "\n";
+
+					aSim->RenderFrame( strExperimentsRan + "ppm" , RENDER_HW );
+
+
+					ExperimentsRan[ strExperimentsRan ] = true;
+					
+
+					for (int h = 0; h < aFactors.size(); h++)
+						ofs << aFactors[h].mName << ",";
+
+					ofs << "\n" << strExperimentsRan << "\n";
+					ofs << aSim->Statistics.Print() << "\n";
+					ofs << "-------------------------------------\n";
+
+				}
+				
+		}
+			
+	}
+}
+//--------------------------------------------------------------------------------------------
+string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
+{
+	if (aSim->mParameter["voxels-created"] == 0)
+		return "Vozelization not yet performed. Please run the 'voxelize'command first";
+
+	ExperimentsRan.clear();
+
+
+	vector<CStatisticFactor> Factors;
+	
+
+    
+	
+	//Factors.push_back( CStatisticFactor("scene.octree.depth", "2 4 8 16"));
+	Factors.push_back( CStatisticFactor("gpu.grid-partition-size", "10 20 50 100 "));
+	Factors.push_back( CStatisticFactor("gpu.memory.cache-enabled", "1 0 0 0 "));
+	
+
+	//Run the factorial experiment
+	ofstream ofs("experiment.results.log");
+	if (!ofs.good())
+		throw string("Could not open file");
+	//Do the voxelization first because it takes a lot of time
+	int VoxelLevel[] = {2,4,8,16};
+	for (int v= 0; v < (VoxelLevel[0]/sizeof(int); v++ )
+	{
+		ofs << "\n\n=========================================\n";
+		ofs << "Octree level: " <<  VoxelLevel[v] << "\n";
+		ofs << "=========================================\n";
+		aSim->SetParameter("scene.octree.depth", VoxelLevel[v] );
+		aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
+
+		for (int e = 1; e < (2 << Factors.size())-1; e++)
+		{
+			bitset<32> Bitset(e);
+			cout << Bitset.to_string() << "\n";
+			RunExperiment( Factors,Bitset,4,aSim,ofs);
+		}
+	}
+	ofs.close();
+
+	return "Factorial experiment complete\n";
 }
 //--------------------------------------------------------------------------------------------
 string CallBack_Show(vector<string> aArg, CSimulator * aSim )
@@ -245,6 +348,7 @@ string CallBack_Help(vector<string> aArg, CSimulator * aSim )
 		"render <filepath>                                : renders PPM to specified file\n"
 		"voxelize                                         : Voxelizes currently loaded model\n"
 		"set <octree|cache> <attribute> <value>           : sets values\n"
+		"run_factorial_exp                                : \n"
 		"quit                                             : exits application\n";
 
 	return Help;
@@ -264,6 +368,8 @@ CSimulator::CSimulator()
 	mCommands["show"]		=  CallBack_Show;
 	mCommands["set"]        =  CallBack_Set;
 	mCommands["print"]      =  CallBack_PrintObject;
+	mCommands["run_factorial_exp"]      =  CallBack_RunFactorialExperiment;
+	mCommands["rfe"]                    =  CallBack_RunFactorialExperiment;
 
 	mObjects["gpu"]   = (CGenericObject*)&Gpu;
 	mObjects["scene"] = (CGenericObject*)&Scene;
@@ -438,7 +544,9 @@ void CSimulator::RenderSwFast( ofstream & ofs )
 		
 		for (int i = 0; i < ResolutionWidth; i++)
 		{
-			
+			//if (i == 76 && j == 116)
+			//	cout << "Here\n";
+
 			CRay Ray =  Gpu.Rgu.Execute( i,j );
 			TMortonCode  GtResut = Gpu.Gt[0].Execute( Ray );
 

@@ -48,6 +48,27 @@ public:
 	
 } ;
 //------------------------------------------------------------------
+
+	class CStatisticFactor
+	{
+	public:
+		CStatisticFactor( )  {}
+		CStatisticFactor(string aName, string Levels )  
+		{
+			mName = aName;
+			stringstream oss;
+			int Value;
+			oss << Levels;
+			while (oss >> Value)
+				mLevel.push_back( Value );
+			
+		}
+
+
+		string      mName;
+		vector<int> mLevel;
+	};
+//------------------------------------------------------------------
 #endif
 
 

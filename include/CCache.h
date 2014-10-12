@@ -7,12 +7,6 @@ using namespace std;
 
 //typedef unsigned int WORD32;
 
-class Foo
-{
-public:
-	CQuad Q;
-	Caca MXXX;
-};
 
 
 //----------------------------------------------------------------------------------------------

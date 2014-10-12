@@ -28,7 +28,7 @@ TMortonCode CGeometryTraversalUnit::Execute( CRay & aRay )
 TMortonCode CGeometryTraversalUnit::Execute( CRay & aRay, TMortonCode aCurrentMortonCode, E_OCTREE_TYPE aCurrentType )
 {
 	TMortonCode IntersectedMortonCode = NULL_MORTON_CODE;
-
+	
 	if (aCurrentType == EMPTY)
 		return NULL_MORTON_CODE;
 

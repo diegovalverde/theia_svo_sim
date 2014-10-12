@@ -116,6 +116,11 @@ void CGpu::Execute( ofstream & ofs)
 		{
 			for (int Row = GridParitition[ParititioIndex].X0; Row < GridParitition[ParititioIndex].X1; Row++)
 			{
+
+		//		if (Row == 76 && Col == 116)
+		//		cout << "Here\n";
+
+
 				CRay Ray =  Rgu.Execute( Row ,Col );
 
 				int GtIndex  = GetAssignedGt(Row,Col);
