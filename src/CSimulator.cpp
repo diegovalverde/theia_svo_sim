@@ -183,6 +183,9 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 
 					aSim->RenderFrame( strExperimentsRan + "ppm" , RENDER_HW );
 
+					#ifndef _WIN32
+						system(string("display " + aArg[0] + " &").c_str());
+					#endif
 
 					ExperimentsRan[ strExperimentsRan ] = true;
 					
@@ -223,7 +226,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 		throw string("Could not open file");
 	//Do the voxelization first because it takes a lot of time
 	int VoxelLevel[] = {2,4,8,16};
-	for (int v= 0; v < (sizeof(VoxelLevel[0])/sizeof(int)); v++ )
+	for (int v= 0; v < (sizeof(VoxelLevel)/sizeof(int)); v++ )
 	{
 		ofs << "\n\n=========================================\n";
 		ofs << "Octree level: " <<  VoxelLevel[v] << "\n";
