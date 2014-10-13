@@ -184,7 +184,7 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 					aSim->RenderFrame( strExperimentsRan + "ppm" , RENDER_HW );
 
 					#ifndef _WIN32
-						system(string(strExperimentsRan + "ppm &").c_str());
+						system(string("display " + strExperimentsRan + "ppm &").c_str());
 					#endif
 
 					ExperimentsRan[ strExperimentsRan ] = true;
