@@ -207,7 +207,7 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 {
 	
-	ExperimentsRan.clear();
+	
 
 
 	vector<CStatisticFactor> Factors;
@@ -228,6 +228,8 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	int VoxelLevel[] = {2,4,8,16};
 	for (int v= 0; v < (sizeof(VoxelLevel)/sizeof(int)); v++ )
 	{
+		ExperimentsRan.clear();
+
 		ofs << "\n\n=========================================\n";
 		ofs << "Octree level: " <<  VoxelLevel[v] << "\n";
 		ofs << "=========================================\n";
