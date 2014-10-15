@@ -10,6 +10,8 @@ CMemory::CMemory()
 
 	mParameter["cache-enabled"] = 1;
 	mParameter["validate-cache-data"] = 1;
+	mParameter["cache-lines-per-way"] = 64;
+	mParameter["cache-blocks-per-line"] = 64;
 }
 //---------------------------------------------------------------------------------------------
 void CMemory::Initialize( int aTreeDepth, int aLinesPerCache )
@@ -19,7 +21,7 @@ void CMemory::Initialize( int aTreeDepth, int aLinesPerCache )
 	{
 		CCache Cache;
 		int LineCount = (i == 0) ? 8 : aLinesPerCache;
-		Cache.Initialize(aLinesPerCache, 2 );
+		Cache.Initialize(aLinesPerCache, mParameter["cache-blocks-per-line"] );
 		mCache_L1.push_back(Cache);
 	}
 }
@@ -30,7 +32,7 @@ void CMemory::Write( TMortonCode aAddress, unsigned long aData )
 }
 //---------------------------------------------------------------------------------------------
 
-static map<WORD32,bool> LastAddr;
+
 double CMemory::Read( TAddress aAddress )
 {
 	unsigned int Data;
@@ -42,11 +44,6 @@ double CMemory::Read( TAddress aAddress )
 	}
 
 
-	/*
-	if (LastAddr.find(aAddress.LogicAddr) == LastAddr.end())
-		LastAddr[aAddress.LogicAddr] = true;
-	else
-		cout << "AHA!!\n";*/
 
 	bool Hit = false;
 	//See which of the caches has the data

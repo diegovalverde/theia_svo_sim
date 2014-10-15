@@ -23,7 +23,9 @@ string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
 	aSim->Scene.OCtree.Populate( aSim->Scene.Geometry );
 	aSim->mParameter["voxels-created"] = 1;
 
-	aSim->Gpu.Memory.Initialize( aSim->Scene.OCtree.mParameter["depth"], 64 );
+	aSim->Gpu.Memory.Initialize( 
+		aSim->Scene.OCtree.mParameter["depth"], 
+		aSim->Gpu.Memory.mParameter["cache-lines-per-way"] );
 
 	//Ok, now initialize the GPU memory
 	cout << "Writting back GPU memory hierarchy\n";
@@ -38,8 +40,7 @@ string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
 		for (int i = 0; i < 8; i++)
 		{
 			TMortonCode ChildMortonCode = ((ParentMortonCode << 3) + i);
-			if (ChildMortonCode == 87)
-				cout << "Aha!\n";
+		
 			if (aSim->Scene.OCtree.Octant.find( ChildMortonCode ) == aSim->Scene.OCtree.Octant.end())
 			{
 				BitPosition += 2;
@@ -76,7 +77,7 @@ string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
 		aSim->Gpu.Memory.Write( WriteAddress, WriteData.to_ulong() ); 
 		
 	}
-	//Verify your stuff in particular, look at Octant[87]
+	
 
 	return "Voxelization complete";
 }
@@ -187,14 +188,15 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 					aSim->RenderFrame(  ImageFileName, RENDER_HW );
 
 					#ifndef _WIN32
-						system(string("display " + ImageFileName + " &").c_str());
+						if (aSim->mParameter["rfe-display-images"]  == 1)
+							system(string("display " + ImageFileName + " &").c_str());
 					#endif
 
 					ExperimentsRan[ strExperimentsRan ] = true;
 		
 
 
-					ofs << aSim->Scene.OCtree.mParameter["depth"] << " , " << strExperimentsRan << " , ";
+					ofs << aSim->Scene.OCtree.mParameter["depth"] << " , " << strExperimentsRan ;
 					ofs << aSim->Statistics.Stat["mem.cache.l1.hit_count"] << "  ,  ";
 					ofs << aSim->Statistics.Stat["mem.cache.l1.miss_count"] << "  ,  ";
 					ofs << aSim->Statistics.Stat["mem.external.read_access_count"] << "\n";
@@ -215,7 +217,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	//Factors.push_back( CStatisticFactor("scene.octree.depth", "2 4 8 16"));
 	Factors.push_back( CStatisticFactor("gpu.grid-partition-size", "2 10 20 200 ")); //1% 5% 10% 100%
 	Factors.push_back( CStatisticFactor("gpu.memory.cache-enabled", "1 0 0 0 "));
-	
+	Factors.push_back( CStatisticFactor("gpu.memory.cache-lines-per-way", "32 64 128 256" ));
 
 	//Run the factorial experiment
 	ofstream ofs("experiment.results.log");
@@ -384,6 +386,7 @@ CSimulator::CSimulator()
 
 	
 	mParameter["voxels-created"] = 0;
+	mParameter["rfe-display-images"] = 0;
 }
 //--------------------------------------------------------------------------------------------
 CSimulator::~CSimulator()
