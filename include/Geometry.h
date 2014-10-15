@@ -12,7 +12,9 @@ using namespace std;
 #include <math.h>
 #include <fstream>
 #include <iostream>
-
+#ifndef _WIN32
+	#define sprintf_s sprintf
+#endif
 //------------------------------------------------------------------------------
 class CVector
 {
