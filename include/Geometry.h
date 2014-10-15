@@ -210,10 +210,10 @@ public:
 		char Buffer[2048];
 		string strOut;
 
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", Origen.x,Origen.y,Origen.z);
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", Origen.x,Origen.y,Origen.z);
 		strOut += Buffer;
 		strOut += Buffer;
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", 
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", 
 			(Origen.x + mMaxLenght*Direction.x) ,
 			(Origen.x + mMaxLenght*Direction.y) ,
 			(Origen.x + mMaxLenght*Direction.z) 

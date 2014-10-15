@@ -60,7 +60,7 @@ void WriteProjectionPlaneObj( string aPath )
 	char Buffer[2048];
 	for (int i = 0; i < 4; i++)
 	{
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", ProPlane.Vertex[i].x,ProPlane.Vertex[i].y,ProPlane.Vertex[i].z);
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", ProPlane.Vertex[i].x,ProPlane.Vertex[i].y,ProPlane.Vertex[i].z);
 		strOut += Buffer;
 	}
 	ofs << strOut;

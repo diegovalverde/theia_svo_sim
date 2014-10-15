@@ -22,21 +22,21 @@ string COctant::DumpVertex()
 		
 		double L = Lenght;
 
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x       ,MinVertex.y         ,MinVertex.z       );
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x       ,MinVertex.y         ,MinVertex.z       );
 		strOut += Buffer;
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x + L   ,MinVertex.y         ,MinVertex.z       );
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x + L   ,MinVertex.y         ,MinVertex.z       );
 		strOut += Buffer;
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x + L   ,MinVertex.y + L     ,MinVertex.z       );
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x + L   ,MinVertex.y + L     ,MinVertex.z       );
 		strOut += Buffer;
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x       ,MinVertex.y + L     ,MinVertex.z       );
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x       ,MinVertex.y + L     ,MinVertex.z       );
 		strOut += Buffer;
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x       ,MinVertex.y         ,MinVertex.z  + L  );
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x       ,MinVertex.y         ,MinVertex.z  + L  );
 		strOut += Buffer;
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x + L   ,MinVertex.y         ,MinVertex.z  + L  );
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x + L   ,MinVertex.y         ,MinVertex.z  + L  );
 		strOut += Buffer;
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x + L   ,MinVertex.y + L     ,MinVertex.z  + L  );
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x + L   ,MinVertex.y + L     ,MinVertex.z  + L  );
 		strOut += Buffer;
-		sprintf(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x       ,MinVertex.y + L     ,MinVertex.z  + L  );
+		sprintf_s(Buffer,"v %.5f %.5f %.5f\n", MinVertex.x       ,MinVertex.y + L     ,MinVertex.z  + L  );
 		strOut += Buffer;
 
 	

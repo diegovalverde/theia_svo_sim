@@ -38,6 +38,8 @@ string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
 		for (int i = 0; i < 8; i++)
 		{
 			TMortonCode ChildMortonCode = ((ParentMortonCode << 3) + i);
+			if (ChildMortonCode == 87)
+				cout << "Aha!\n";
 			if (aSim->Scene.OCtree.Octant.find( ChildMortonCode ) == aSim->Scene.OCtree.Octant.end())
 			{
 				BitPosition += 2;
@@ -74,7 +76,7 @@ string CallBack_Voxelize(vector<string> aArg, CSimulator * aSim )
 		aSim->Gpu.Memory.Write( WriteAddress, WriteData.to_ulong() ); 
 		
 	}
-	
+	//Verify your stuff in particular, look at Octant[87]
 
 	return "Voxelization complete";
 }
@@ -548,9 +550,7 @@ void CSimulator::RenderSwFast( ofstream & ofs )
 		
 		for (int i = 0; i < ResolutionWidth; i++)
 		{
-			//if (i == 76 && j == 116)
-			//	cout << "Here\n";
-
+			
 			CRay Ray =  Gpu.Rgu.Execute( i,j );
 			TMortonCode  GtResut = Gpu.Gt[0].Execute( Ray );
 

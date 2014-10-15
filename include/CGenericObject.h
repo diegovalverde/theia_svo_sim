@@ -41,7 +41,7 @@ public:
 		for (auto I = mParameter.begin(); I != mParameter.end(); I++)
 		{
 			char Buffer[256];
-			sprintf(Buffer,"%-30s : %d\n",  I->first.c_str(), I->second);
+			sprintf_s(Buffer,"%-30s : %d\n",  I->first.c_str(), I->second);
  			oss  << Buffer;
 		}
 

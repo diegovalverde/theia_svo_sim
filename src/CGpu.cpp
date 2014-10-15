@@ -112,19 +112,21 @@ void CGpu::Execute( ofstream & ofs)
 		GridParitition[ParititioIndex].X0 , GridParitition[ParititioIndex].Y0,
 		GridParitition[ParititioIndex].X1, GridParitition[ParititioIndex].Y1 );
 
+		//If multicore is enabled, this is place to reset the cache and averaging the hits/misses!!
+
 		for (  int Col = GridParitition[ParititioIndex].Y0 ; Col < GridParitition[ParititioIndex].Y1 ; Col++)
 		{
 			for (int Row = GridParitition[ParititioIndex].X0; Row < GridParitition[ParititioIndex].X1; Row++)
 			{
 
-		//		if (Row == 76 && Col == 116)
-		//		cout << "Here\n";
-
-
+			
 				CRay Ray =  Rgu.Execute( Row ,Col );
 
 				int GtIndex  = GetAssignedGt(Row,Col);
 
+				//I need to consider the case where we we have more than 1 gt. A single Gt is too unfair for the cache...
+				//In reality I do not need to model all of the gt, only one of them... however it would be best to model
+				//this single guy going tru the grid and then 'reseting' the cache and averaging the hits/misses
 				TMortonCode  GtResut = Gt[ GtIndex ].Execute( Ray, ROOT_MORTON_CODE, NON_EMPTY );
 				
 				ColorDump[Row][Col] = (GtResut == NULL_MORTON_IDX) ? false : true;

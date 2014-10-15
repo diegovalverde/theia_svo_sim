@@ -14,6 +14,7 @@ CMemory::CMemory()
 //---------------------------------------------------------------------------------------------
 void CMemory::Initialize( int aTreeDepth, int aLinesPerCache )
 {
+	mCache_L1.clear();
 	for (int i = 0; i < aTreeDepth; i++)
 	{
 		CCache Cache;
@@ -82,14 +83,14 @@ double CMemory::Read( TAddress aAddress )
 		//you can not write a single block of the line but *all* of the blocks.
 		//This is because you have a single valid bit per line, this is, either all blocks are
 		//valid or they are not
-		
-		aAddress.CacheAddr.BlockOffset = 0;
-		unsigned int WriteData = ((mMainBuffer.find(aAddress.LogicAddr) == mMainBuffer.end() )? 0xffff : mMainBuffer[aAddress.LogicAddr]);
-		mCache_L1[TreeLevel].Write(aAddress, WriteData);
+		TAddress WriteAddr = aAddress;
+		WriteAddr.CacheAddr.BlockOffset = 0;
+		unsigned int WriteData = ((mMainBuffer.find(WriteAddr.LogicAddr) == mMainBuffer.end() )? 0xffff : mMainBuffer[WriteAddr.LogicAddr]);
+		mCache_L1[TreeLevel].Write(WriteAddr, WriteData);
 
-		aAddress.CacheAddr.BlockOffset = 1;
-		WriteData = ((mMainBuffer.find(aAddress.LogicAddr) == mMainBuffer.end() )? 0xffff : mMainBuffer[aAddress.LogicAddr]);
-		mCache_L1[TreeLevel].Write(aAddress,WriteData);
+		WriteAddr.CacheAddr.BlockOffset = 1;
+		WriteData = ((mMainBuffer.find(WriteAddr.LogicAddr) == mMainBuffer.end() )? 0xffff : mMainBuffer[WriteAddr.LogicAddr]);
+		mCache_L1[TreeLevel].Write(WriteAddr,WriteData);
 		
 		
 	}

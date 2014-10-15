@@ -60,7 +60,11 @@ TMortonCode CGeometryTraversalUnit::Execute( CRay & aRay, TMortonCode aCurrentMo
 	//Read from memory
 	CMemory::TAddress ReadAddress;
 	ReadAddress.LogicAddr = aCurrentMortonCode;
+
+	
 	WORD32 ReadData = Memory->Read(ReadAddress);
+
+	
 
 
 	for (int i = 0; i < 8; i++)
