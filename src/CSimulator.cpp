@@ -149,6 +149,7 @@ map<string,bool> ExperimentsRan;		//Time is precious, use this list to make sure
 //--------------------------------------------------------------------------------------------
 void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int aMaxLevels, CSimulator * aSim, ofstream & ofs)
 {
+	static int ExperimentNumber = 0;
 	string strExperimentsRan;
 	for (int l = 0; l < aMaxLevels; l++)
 	{
@@ -165,7 +166,7 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 					//	cout  << F->mName << " = "  << F->mLevel[l] << " , ";
 						aSim->SetParameter(F->mName,F->mLevel[l] );
 						ostringstream oss;
-						oss <<  F->mLevel[l] <<  ".";
+						oss <<  F->mLevel[l] <<  " , ";
 						strExperimentsRan += oss.str();
 
 					} else {	//This is the factor that we 'evaluate'. This is, while keeping all other factors constant, run a sim using each level from this factor
@@ -173,7 +174,7 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 					//	cout  << F->mName << "* = "  << F->mLevel[r] << ", ";
 						aSim->SetParameter(F->mName,F->mLevel[r] );
 						ostringstream oss;
-						oss <<  F->mLevel[r] <<  ".";
+						oss <<  F->mLevel[r] <<  " , ";
 						strExperimentsRan += oss.str();
 					}
 					Index++;
@@ -182,22 +183,22 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 				if (ExperimentsRan.find( strExperimentsRan ) == ExperimentsRan.end())
 				{
 					cout << strExperimentsRan << "\n";
-
-					aSim->RenderFrame( strExperimentsRan + "ppm" , RENDER_HW );
+					string ImageFileName = std::to_string(ExperimentNumber++) + ".ppm";
+					aSim->RenderFrame(  ImageFileName, RENDER_HW );
 
 					#ifndef _WIN32
-						system(string("display " + strExperimentsRan + "ppm &").c_str());
+						system(string("display " + ImageFileName + " &").c_str());
 					#endif
 
 					ExperimentsRan[ strExperimentsRan ] = true;
+		
+
+
+					ofs << aSim->Scene.OCtree.mParameter["depth"] << " , " << strExperimentsRan << " , ";
+					ofs << aSim->Statistics.Stat["mem.cache.l1.hit_count"] << "  ,  ";
+					ofs << aSim->Statistics.Stat["mem.cache.l1.miss_count"] << "  ,  ";
+					ofs << aSim->Statistics.Stat["mem.external.read_access_count"] << "\n";
 					
-
-					for (int h = 0; h < aFactors.size(); h++)
-						ofs << aFactors[h].mName << ",";
-
-					ofs << "\n" << strExperimentsRan << "\n";
-					ofs << aSim->Statistics.Print() << "\n";
-					ofs << "-------------------------------------\n";
 
 				}
 				
@@ -209,16 +210,10 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 {
 	
-	
-
-
 	vector<CStatisticFactor> Factors;
 	
-
-    
-	
 	//Factors.push_back( CStatisticFactor("scene.octree.depth", "2 4 8 16"));
-	Factors.push_back( CStatisticFactor("gpu.grid-partition-size", "10 20 50 100 "));
+	Factors.push_back( CStatisticFactor("gpu.grid-partition-size", "2 10 20 200 ")); //1% 5% 10% 100%
 	Factors.push_back( CStatisticFactor("gpu.memory.cache-enabled", "1 0 0 0 "));
 	
 
@@ -227,14 +222,20 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	if (!ofs.good())
 		throw string("Could not open file");
 	//Do the voxelization first because it takes a lot of time
-	int VoxelLevel[] = {2,4,8,16};
+	int VoxelLevel[] = {5,6,7,8};
+
+
+	ofs << "octree.depth , ";
+
+	for (int h = 0; h < Factors.size(); h++)
+		ofs << Factors[h].mName << ",";
+
+	ofs << " mem.cache.l1.hit_count , mem.cache.l1.miss_count , mem.external.read_access_count\n";
+
 	for (int v= 0; v < (sizeof(VoxelLevel)/sizeof(int)); v++ )
 	{
 		ExperimentsRan.clear();
 
-		ofs << "\n\n=========================================\n";
-		ofs << "Octree level: " <<  VoxelLevel[v] << "\n";
-		ofs << "=========================================\n";
 		aSim->SetParameter("scene.octree.depth", VoxelLevel[v] );
 		
 		CallBack_Voxelize(vector<string>(),aSim);
