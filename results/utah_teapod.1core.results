@@ -1,0 +1,112 @@
+                                                                                             Df
+octree_depth                                                                                  1
+gpu_grid_partition_size                                                                       1
+gpu_memory_cache_enabled                                                                      1
+gpu_memory_cache_lines_per_way                                                                1
+octree_depth:gpu_grid_partition_size                                                          1
+octree_depth:gpu_memory_cache_enabled                                                         1
+gpu_grid_partition_size:gpu_memory_cache_enabled                                              1
+octree_depth:gpu_memory_cache_lines_per_way                                                   1
+gpu_grid_partition_size:gpu_memory_cache_lines_per_way                                        1
+gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                                       1
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled                                 1
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_lines_per_way                           1
+octree_depth:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                          1
+gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way               1
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way  1
+Residuals                                                                                    88
+                                                                                                Sum Sq
+octree_depth                                                                                 2.068e+10
+gpu_grid_partition_size                                                                      2.555e+10
+gpu_memory_cache_enabled                                                                     4.086e+10
+gpu_memory_cache_lines_per_way                                                               3.271e+08
+octree_depth:gpu_grid_partition_size                                                         1.449e+09
+octree_depth:gpu_memory_cache_enabled                                                        1.880e+09
+gpu_grid_partition_size:gpu_memory_cache_enabled                                             7.639e+08
+octree_depth:gpu_memory_cache_lines_per_way                                                  1.845e+07
+gpu_grid_partition_size:gpu_memory_cache_lines_per_way                                       6.120e+07
+gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                                      4.249e+08
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled                                2.529e+07
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_lines_per_way                          3.792e+06
+octree_depth:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                         2.638e+07
+gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way              1.368e+08
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way 8.477e+06
+Residuals                                                                                    4.501e+10
+                                                                                               Mean Sq
+octree_depth                                                                                 2.068e+10
+gpu_grid_partition_size                                                                      2.555e+10
+gpu_memory_cache_enabled                                                                     4.086e+10
+gpu_memory_cache_lines_per_way                                                               3.271e+08
+octree_depth:gpu_grid_partition_size                                                         1.449e+09
+octree_depth:gpu_memory_cache_enabled                                                        1.880e+09
+gpu_grid_partition_size:gpu_memory_cache_enabled                                             7.639e+08
+octree_depth:gpu_memory_cache_lines_per_way                                                  1.845e+07
+gpu_grid_partition_size:gpu_memory_cache_lines_per_way                                       6.120e+07
+gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                                      4.249e+08
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled                                2.529e+07
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_lines_per_way                          3.792e+06
+octree_depth:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                         2.638e+07
+gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way              1.368e+08
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way 8.477e+06
+Residuals                                                                                    5.114e+08
+
+
+
+
+                                                                                             F value
+octree_depth                                                                                  40.428
+gpu_grid_partition_size                                                                       49.961
+gpu_memory_cache_enabled                                                                      79.895
+gpu_memory_cache_lines_per_way                                                                 0.640
+octree_depth:gpu_grid_partition_size                                                           2.834
+octree_depth:gpu_memory_cache_enabled                                                          3.676
+gpu_grid_partition_size:gpu_memory_cache_enabled                                               1.494
+octree_depth:gpu_memory_cache_lines_per_way                                                    0.036
+gpu_grid_partition_size:gpu_memory_cache_lines_per_way                                         0.120
+gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                                        0.831
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled                                  0.049
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_lines_per_way                            0.007
+octree_depth:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                           0.052
+gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                0.267
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way   0.017
+Residuals                                                                                           
+
+
+#Significancia estadistica, valor alto  implica que la probabilidad de que la observacion fue generada por el azar. 
+#Valores de 10^-3 son "buenos" 
+                                                                                               Pr(>F)
+octree_depth                                                                                 8.83e-09
+gpu_grid_partition_size                                                                      3.54e-10
+gpu_memory_cache_enabled                                                                     5.50e-14
+gpu_memory_cache_lines_per_way                                                                 0.4260
+octree_depth:gpu_grid_partition_size                                                           0.0959
+octree_depth:gpu_memory_cache_enabled                                                          0.0584
+gpu_grid_partition_size:gpu_memory_cache_enabled                                               0.2249
+octree_depth:gpu_memory_cache_lines_per_way                                                    0.8498
+gpu_grid_partition_size:gpu_memory_cache_lines_per_way                                         0.7302
+gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                                        0.3645
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled                                  0.8246
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_lines_per_way                            0.9316
+octree_depth:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                           0.8209
+gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                0.6064
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way   0.8979
+Residuals                                                                                            
+                                                                                                
+octree_depth                                                                                 ***
+gpu_grid_partition_size                                                                      ***
+gpu_memory_cache_enabled                                                                     ***
+gpu_memory_cache_lines_per_way                                                                  
+octree_depth:gpu_grid_partition_size                                                         .  
+octree_depth:gpu_memory_cache_enabled                                                        .  
+gpu_grid_partition_size:gpu_memory_cache_enabled                                                
+octree_depth:gpu_memory_cache_lines_per_way                                                     
+gpu_grid_partition_size:gpu_memory_cache_lines_per_way                                          
+gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                                         
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled                                   
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_lines_per_way                             
+octree_depth:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                            
+gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way                 
+octree_depth:gpu_grid_partition_size:gpu_memory_cache_enabled:gpu_memory_cache_lines_per_way    
+Residuals                                                                                       
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
