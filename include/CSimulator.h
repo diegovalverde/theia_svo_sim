@@ -51,7 +51,7 @@ public:
 	CScene Scene;
 	CGpu   Gpu;
 public:
-	
+	string mModelName;
 
 
 private:

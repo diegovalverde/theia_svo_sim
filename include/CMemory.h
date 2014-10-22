@@ -13,7 +13,8 @@ public:
 	
 
 	void Initialize( int aTreeDepth, int aLinesPerCache );
-	
+	void Clear();
+	string PrintCacheHitRates();
 
 	typedef struct T_CacheAddress
 	{
@@ -44,15 +45,20 @@ public:
 			vector<unsigned int> Block;
 		};
 	public:
-		CCache(){}
+		CCache(){ mWriteCount = 0; mReadCount = 0; mHitCount = 0;}
 		void Initialize(int aDepth, int aBlocksPerLine );
 		bool Read( TAddress aAddress, unsigned int & aData );
 	
 
-		void Write( TAddress aAddress, unsigned int & aData);
+		void Write( TAddress aAddress, unsigned int & aData, CStatistics * aStatistics);
 		
 	public:
 		vector<CacheLine> mLines;
+		long unsigned int mWriteCount;
+		long unsigned int mReadCount;
+		long unsigned int mHitCount;
+	private:
+		unsigned long int GetLineIndex( TAddress aAddress )	;
 	};
 	map<TMortonCode, unsigned int > mMainBuffer;
 	vector<CCache> mCache_L1;

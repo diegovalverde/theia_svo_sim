@@ -140,7 +140,8 @@ string CallBack_Render(vector<string> aArg, CSimulator * aSim )
 
 	aSim->RenderFrame( aArg[0], strRenderType[aArg[1] ] );
 	#ifndef _WIN32
-		system(string("display " + aArg[0] + " &").c_str());
+		if (aSim->Gpu.mParameter["core-count"])
+			system(string("display " + aArg[0] + " &").c_str());
 	#endif
 	return "\nRender output written into " +  aArg[0] ;
 
@@ -188,7 +189,7 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 					aSim->RenderFrame(  ImageFileName, RENDER_HW );
 
 					#ifndef _WIN32
-						if (aSim->mParameter["rfe-display-images"]  == 1)
+						if (aSim->mParameter["rfe-display-images"]  == 1 && aSim->Gpu.mParameter["core-count"] == 1)
 							system(string("display " + ImageFileName + " &").c_str());
 					#endif
 
@@ -197,8 +198,9 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 
 
 					ofs << aSim->Scene.OCtree.mParameter["depth"] << " , " << strExperimentsRan ;
-					ofs << aSim->Statistics.Stat["mem.cache.l1.hit_count"] << "  ,  ";
-					ofs << aSim->Statistics.Stat["mem.cache.l1.miss_count"] << "  ,  ";
+					ofs << ((float)aSim->Statistics.Stat["mem.cache.l1.hit_count"]/(float)aSim->Statistics.Stat["mem.total_reads"]) << "  ,  ";
+					ofs << ((float)aSim->Statistics.Stat["mem.cache.l1.miss_count"]/aSim->Statistics.Stat["mem.total_reads"]) << "  ,  ";
+					ofs << aSim->Statistics.Stat["mem.replace_cache_entry"] << " , ";
 					ofs << aSim->Statistics.Stat["mem.external.read_access_count"] << "\n";
 					
 
@@ -214,25 +216,27 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	
 	vector<CStatisticFactor> Factors;
 	
-	//Factors.push_back( CStatisticFactor("scene.octree.depth", "2 4 8 16"));
+	
+	Factors.push_back( CStatisticFactor("gpu.core-count","1 8 16 32"));
 	Factors.push_back( CStatisticFactor("gpu.grid-partition-size", "2 10 20 200 ")); //1% 5% 10% 100%
-	Factors.push_back( CStatisticFactor("gpu.memory.cache-enabled", "1 0 0 0 "));
+	//Factors.push_back( CStatisticFactor("gpu.memory.cache-enabled", "1 0 0 0 "));
 	Factors.push_back( CStatisticFactor("gpu.memory.cache-lines-per-way", "32 64 128 256" ));
 
 	//Run the factorial experiment
-	ofstream ofs("experiment.results.log");
+	ofstream ofs("experiment.results.csv");
 	if (!ofs.good())
 		throw string("Could not open file");
 	//Do the voxelization first because it takes a lot of time
 	int VoxelLevel[] = {5,6,7,8};
 
+	ofs << "# Loaded model: " << aSim->mModelName << "\n";
 
 	ofs << "octree.depth , ";
 
 	for (int h = 0; h < Factors.size(); h++)
 		ofs << Factors[h].mName << ",";
 
-	ofs << " mem.cache.l1.hit_count , mem.cache.l1.miss_count , mem.external.read_access_count\n";
+	ofs << " cache_l1_hit_rate , cache_l1_miss_rate , cache_replace_rate, external_mem_read_count\n";
 
 	for (int v= 0; v < (sizeof(VoxelLevel)/sizeof(int)); v++ )
 	{
@@ -287,7 +291,14 @@ string CallBack_Show(vector<string> aArg, CSimulator * aSim )
 	}
 	else if (Type == "stat"	)
 	{
-		return aSim->Statistics.Print();
+		ostringstream oss;
+		oss  
+		<< aSim->Statistics.Print() << "\n"
+		<< " **** \n"
+		<< "Total cache hit rate " << (100*((float)aSim->Statistics.Stat["mem.cache.l1.hit_count"]/(float)aSim->Statistics.Stat["mem.total_reads"])) << "%\n"
+		<< aSim->Gpu.Memory.PrintCacheHitRates() << "\n";
+
+		return oss.str();
 	} else {
 		return "Invalid type '" + Type + "'\n";
 	}
@@ -372,6 +383,7 @@ CSimulator::CSimulator()
 	mCommands["save"]		=  CallBack_Save;
 	mCommands["quit"]		=  mCommands["q"] = CallBack_Exit;
 	mCommands["voxelize"]	=  CallBack_Voxelize;
+	mCommands["v"]	        =  CallBack_Voxelize;
 	mCommands["render"]		=  CallBack_Render;
 	mCommands["help"]		=  CallBack_Help;
 	mCommands["show"]		=  CallBack_Show;
@@ -439,7 +451,7 @@ string CSimulator::LoadConfigurationFile( string aFileName  )
 
 		if (TokenType == "Scene.Object")
 		{
-			
+			mModelName = Tokens[1];
 			Scene.LoadObject( Tokens[1]  );
 			continue;
 		}

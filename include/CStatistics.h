@@ -19,6 +19,8 @@ public:
 		Stat["mem.external.read_access_count"]           = 0;
 		Stat["mem.cache.l1.hit_count"]                   = 0;
 		Stat["mem.cache.l1.miss_count"]                  = 0;
+		Stat["mem.total_reads"]                          = 0;
+		Stat["mem.replace_cache_entry"]                  = 0;
 		
 	}
 

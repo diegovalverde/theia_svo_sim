@@ -25,6 +25,9 @@ public:
 
 	void Execute( ofstream & ofs );
 	void  Initialialize( CStatistics * aStatistics, CScene * aScene );  
+	string PrintCacheHitRates();
+
+private:	
 	int   GetAssignedGt( int aRow, int aCol );
 public:
 	CRayGenerationUnit				 Rgu;
