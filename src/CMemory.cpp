@@ -10,7 +10,7 @@ CMemory::CMemory()
 
 	mParameter["cache-enabled"] = 1;
 	mParameter["validate-cache-data"] = 1;
-	mParameter["cache-lines-per-way"] = (8*8*8);
+	mParameter["cache-lines-per-way"] = (8*8);
 	mParameter["cache-blocks-per-line"] = 64;
 }
 //---------------------------------------------------------------------------------------------
@@ -50,12 +50,12 @@ string CMemory::PrintCacheHitRates()
 				UsedLines++;
 	
 
-
-
-		oss << "Cache Level " << i << " line count : " 
+		oss << "Cache L" << i << " line count : " 
 		<< mCache_L1[i].mLines.size() 
-		<< " used lines : ("  <<UsedLines  << ") " << (100*( (float)UsedLines/(float)mCache_L1[i].mLines.size() ) ) << "%\n"
-		<< " : hit rate : " << (100*((float)mCache_L1[i].mHitCount / (float)mCache_L1[i].mReadCount)) << "% ";
+		<< ", used lines : ("  <<UsedLines  << ") " << (100*( (float)UsedLines/(float)mCache_L1[i].mLines.size() ) ) << "%"
+		<< ", replaced lines : (" << mCache_L1[i].mReplaceLineCount << " ) " << 100.0f*((float)mCache_L1[i].mReplaceLineCount/(float)mCache_L1[i].mLines.size())<< "% "
+		<< " : hit rate : (" << mCache_L1[i].mHitCount <<  "/" 	<< mCache_L1[i].mReadCount 	<< ") "
+		<< (100*((float)mCache_L1[i].mHitCount / (float)mCache_L1[i].mReadCount)) << "% \n";
 		
 	}	
 	return oss.str();
@@ -202,42 +202,20 @@ void CMemory::CCache::Write( CMemory::TAddress aAddress, unsigned int & aData, C
 	mWriteCount += 1;
 	CMemory::TCacheAddress Address =  aAddress.CacheAddr;
 
-#ifdef OPT_INDEX
-
-	/*
-	//This makes it muuuuuuuuuch worse!!!!
-
-	//cout << "The Address is " << std::hex << aAddress.LogicAddr << "\n";
-	bitset<128> Bitset(aAddress.LogicAddr);
-
-	int HighestBit = GetHighestBitIndex( aAddress.LogicAddr );
-	//cout << "Highest bit " << std::dec << HighestBit << "\n";
-	if (HighestBit > 0 && HighestBit < 128)
-		Bitset[ HighestBit ] = false;
-	int Index = (int)Bitset.to_ulong() % mLines.size();  //TODO: Maybe MSB is not needed
-*/
-
-//This is worse but not as much as the previous one
-bitset<256> Bitset(Address.Index);
-
-	int HighestBit = GetHighestBitIndex( Address.Index );
-	//cout << "Highest bit " << std::dec << HighestBit << "\n";
-	if (HighestBit > 0 && HighestBit < 256)
-		Bitset[ HighestBit ] = false;
-	int Index = (int)Bitset.to_ulong() % mLines.size();  //TODO: Maybe MSB is not needed
-
-	
-#else	
-	//int Index = Address.Index % mLines.size();  //TODO: Maybe MSB is not needed
 	int Index = GetLineIndex( aAddress );
-#endif	
 
 
 	if (mLines[ Index ].Valid == true)
 	{
-		bitset<64> Bitset(Index);
-	//	cout << std::hex << "0x" << aAddress.LogicAddr << " " << Bitset.to_string() << "\n";
+		bitset<32> BitsetOld(mLines[ Index ].Tag);
+		bitset<32> BitsetNew(Index);
+#if 0
+		cout << "-W- Replacing " << mLines[ Index ].Tag << " " << BitsetOld.to_string() << " by " << 
+		std::hex << "0x" << aAddress.LogicAddr << " " << BitsetNew.to_string() << "\n";
 		aStatistics->Stat["mem.replace_cache_entry"] += 1;
+#endif
+		
+		mReplaceLineCount++;
 	}
 
 	mLines[ Index ].Tag = aAddress.LogicAddr;//Address.Tag;

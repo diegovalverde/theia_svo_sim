@@ -45,7 +45,7 @@ public:
 			vector<unsigned int> Block;
 		};
 	public:
-		CCache(){ mWriteCount = 0; mReadCount = 0; mHitCount = 0;}
+		CCache(){ mWriteCount = 0; mReadCount = 0; mHitCount = 0; mReplaceLineCount = 0;}
 		void Initialize(int aDepth, int aBlocksPerLine );
 		bool Read( TAddress aAddress, unsigned int & aData );
 	
@@ -57,6 +57,7 @@ public:
 		long unsigned int mWriteCount;
 		long unsigned int mReadCount;
 		long unsigned int mHitCount;
+		long unsigned int mReplaceLineCount;
 	private:
 		unsigned long int GetLineIndex( TAddress aAddress )	;
 	};
