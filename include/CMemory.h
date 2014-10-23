@@ -15,7 +15,7 @@ public:
 	void Initialize( int aTreeDepth, int aLinesPerCache );
 	void Clear();
 	string PrintCacheHitRates();
-
+#ifdef DUAL_BLOCK_ENABLE
 	typedef struct T_CacheAddress
 	{
 			
@@ -24,7 +24,14 @@ public:
 			WORD32 Index       : 7  ;       //16 lines in the cache
 			WORD32 Tag         : 24 ;		//The rest of stuff is just the TAG} TCacheAddress; 
 	 } TCacheAddress;
-
+#else
+	 typedef struct T_CacheAddress
+	{
+			
+			WORD32 Index       : 7  ;       //16 lines in the cache
+			WORD32 Tag         : 24 ;		//The rest of stuff is just the TAG} TCacheAddress; 
+	 } TCacheAddress;
+#endif	 
 
 		typedef union T_Address
 		{
@@ -42,7 +49,11 @@ public:
 		{
 			bool Valid;
 			WORD32         Tag;
+#ifdef DUAL_BLOCK_ENABLE			
 			vector<unsigned int> Block;
+#else
+			unsigned int Block;
+#endif			
 		};
 	public:
 		CCache(){ mWriteCount = 0; mReadCount = 0; mHitCount = 0; mReplaceLineCount = 0;}
