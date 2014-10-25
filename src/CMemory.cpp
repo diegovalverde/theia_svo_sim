@@ -66,12 +66,28 @@ void CMemory::Write( TMortonCode aAddress, unsigned long aData )
 	mMainBuffer[ aAddress ] = aData;
 }
 //---------------------------------------------------------------------------------------------
+void CMemory::ClearCaches(void)
+{
+	for (int i = 0; i < mCache_L1.size(); i++)
+		mCache_L1[i].Clear();		
+	
+}
+//---------------------------------------------------------------------------------------------
+unsigned long int CMemory::GetCacheSizeBytes()
+{
+	unsigned long int SizeBytes = 0;
+
+	for (int i = 0; i < mCache_L1.size(); i++)
+		SizeBytes += mCache_L1[i].GetSizeBytes();
 
 
+	return SizeBytes;
+
+}
+//---------------------------------------------------------------------------------------------
 double CMemory::Read( TAddress aAddress )
 {
 	unsigned int Data;
-
 	Statistics->Stat["mem.total_reads"] += 1;
 
 	if (mParameter["cache-enabled"] == 0)
@@ -112,26 +128,7 @@ double CMemory::Read( TAddress aAddress )
 	} else {
 		//We got a cache miss, let's account for that
 		Statistics->Stat["mem.cache.l1.miss_count"] += 1;
-
-
-#ifdef DUAL_BLOCK_ENABLE
-		//The cache line size is 2 16bit blocks. You can only write the *entire* line,
-		//you can not write a single block of the line but *all* of the blocks.
-		//This is because you have a single valid bit per line, this is, either all blocks are
-		//valid or they are not
-		TAddress WriteAddr = aAddress;
-		WriteAddr.CacheAddr.BlockOffset = 0;
-		unsigned int WriteData = ((mMainBuffer.find(WriteAddr.LogicAddr) == mMainBuffer.end() )? 0xffff : mMainBuffer[WriteAddr.LogicAddr]);
-		mCache_L1[TreeLevel].Write(WriteAddr, WriteData, Statistics);
-
-		WriteAddr.CacheAddr.BlockOffset = 1;
-		WriteData = ((mMainBuffer.find(WriteAddr.LogicAddr) == mMainBuffer.end() )? 0xffff : mMainBuffer[WriteAddr.LogicAddr]);
-		mCache_L1[TreeLevel].Write(WriteAddr,WriteData, Statistics);
-#else
-		
 		mCache_L1[TreeLevel].Write(aAddress, mMainBuffer[aAddress.LogicAddr], Statistics);
-
-#endif		
 		
 	}
 	
@@ -147,38 +144,46 @@ double CMemory::Read( TAddress aAddress )
 
 };
 //---------------------------------------------------------------------------------------------
+void CMemory::CCache::Clear() 
+{ 
+	mWriteCount = 0; 
+	mReadCount  = 0; 
+	mHitCount   = 0; 
+	mReplaceLineCount = 0; 
+	for (int i = 0; i < mLines.size(); i++)
+	{
+		mLines[i].Valid = false;
+		mLines[i].Tag = 0;
+		mLines[i].Block = 0xffff;
+	}
+}
+//---------------------------------------------------------------------------------------------
+unsigned long int CMemory::CCache::GetSizeBytes()
+{
+	double SizeBytes = 0;
+	for (int i = 0; i < mLines.size(); i++)
+		SizeBytes +=  sizeof( mLines[i].Block ) + sizeof (mLines[i].Tag);
+	
+	return SizeBytes;
+}
+//---------------------------------------------------------------------------------------------
 void CMemory::CCache::Initialize(int aDepth, int aBlocksPerLine )
 {
 	for (int i = 0; i < aDepth; i++)
 	{
-#ifdef DUAL_BLOCK_ENABLE
-		CCache::CacheLine Line = {false,0,vector<unsigned int>(aBlocksPerLine,0xffffffff) };
-#else
-		CCache::CacheLine Line = {false,0,0xffffffff };
-#endif		
+
+		CCache::CacheLine Line = {false,0,0xffff };
 		mLines.push_back(Line);
 	}
 }
 //---------------------------------------------------------------------------------------------
-//#define OPT_INDEX 1
 unsigned long int CMemory::CCache::GetLineIndex( TAddress aAddress )	
 {
 	TCacheAddress Address =  aAddress.CacheAddr;
 	Address.Tag = aAddress.LogicAddr;
 	
-#ifdef OPT_INDEX
-	bitset<256> Bitset(Address.Index);
-
-	int HighestBit = GetHighestBitIndex( Address.Index );
-	//cout << "Highest bit " << std::dec << HighestBit << "\n";
-	if (HighestBit > 0 && HighestBit < 256)
-		Bitset[ HighestBit ] = false;
-	return ( (int)Bitset.to_ulong() % mLines.size() );
-
-
-#else
 	return (Address.Index % mLines.size());
-#endif		
+
 }
 //---------------------------------------------------------------------------------------------
 bool CMemory::CCache::Read(  CMemory::TAddress aAddress, unsigned int & aData )
@@ -197,7 +202,7 @@ bool CMemory::CCache::Read(  CMemory::TAddress aAddress, unsigned int & aData )
 		return false;
 	}
 
-	if (Line.Tag == Address.Tag)	//This is dangerous. If just a single block is valid, then the entire line is marked as valid, since most stuff to the left (Tag) is zeroes, you may get false positives
+	if (Line.Tag == Address.Tag)	
 	{
 		mHitCount++;
 #ifdef DUAL_BLOCK_ENABLE					
@@ -224,13 +229,9 @@ void CMemory::CCache::Write( CMemory::TAddress aAddress, unsigned int & aData, C
 	{
 		bitset<32> BitsetOld(mLines[ Index ].Tag);
 		bitset<32> BitsetNew(Index);
-#if 0
-		cout << "-W- Replacing " << mLines[ Index ].Tag << " " << BitsetOld.to_string() << " by " << 
-		std::hex << "0x" << aAddress.LogicAddr << " " << BitsetNew.to_string() << "\n";
-		aStatistics->Stat["mem.replace_cache_entry"] += 1;
-#endif
 
 		mReplaceLineCount++;
+		aStatistics->Stat["replace_cache_entry"] += 1;
 	}
 
 	mLines[ Index ].Tag = aAddress.LogicAddr;//Address.Tag;

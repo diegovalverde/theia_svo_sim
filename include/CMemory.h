@@ -3,6 +3,7 @@
 #include "Geometry.h"
 #include "CStatistics.h"
 #include "CGenericObject.h"
+#include <cstdint>
 
 typedef unsigned int WORD32;
 //----------------------------------------------------------------------------------------------
@@ -15,23 +16,13 @@ public:
 	void Initialize( int aTreeDepth, int aLinesPerCache );
 	void Clear();
 	string PrintCacheHitRates();
-#ifdef DUAL_BLOCK_ENABLE
-	typedef struct T_CacheAddress
-	{
-			
-			
-			WORD32 BlockOffset : 1  ;		//16 block per line
-			WORD32 Index       : 7  ;       //16 lines in the cache
-			WORD32 Tag         : 24 ;		//The rest of stuff is just the TAG} TCacheAddress; 
-	 } TCacheAddress;
-#else
+	unsigned long int GetCacheSizeBytes();
 	 typedef struct T_CacheAddress
 	{
 			
 			WORD32 Index       : 7  ;       //16 lines in the cache
 			WORD32 Tag         : 24 ;		//The rest of stuff is just the TAG} TCacheAddress; 
 	 } TCacheAddress;
-#endif	 
 
 		typedef union T_Address
 		{
@@ -41,6 +32,7 @@ public:
 
     double Read( TAddress aAddress );
 	void Write( TMortonCode  aAddress, unsigned long aData );
+	void ClearCaches(void);
 
 	class CCache
 	{
@@ -49,17 +41,16 @@ public:
 		{
 			bool Valid;
 			WORD32         Tag;
-#ifdef DUAL_BLOCK_ENABLE			
-			vector<unsigned int> Block;
-#else
-			unsigned int Block;
-#endif			
+			std::uint16_t Block;
+
 		};
 	public:
-		CCache(){ mWriteCount = 0; mReadCount = 0; mHitCount = 0; mReplaceLineCount = 0;}
-		void Initialize(int aDepth, int aBlocksPerLine );
-		bool Read( TAddress aAddress, unsigned int & aData );
+		CCache(){ Clear(); }
 	
+		void Initialize(int aDepth, int aBlocksPerLine );
+		void Clear();
+		bool Read( TAddress aAddress, unsigned int & aData );
+		unsigned long int  GetSizeBytes();
 
 		void Write( TAddress aAddress, unsigned int & aData, CStatistics * aStatistics);
 		
@@ -78,7 +69,7 @@ public:
 	CStatistics                  *  Statistics;
 
 	bool mValidateCacheData;
-//	bool mBypassCache;
+
 };
 //----------------------------------------------------------------------------------------------
 #endif

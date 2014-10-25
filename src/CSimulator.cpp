@@ -148,8 +148,24 @@ string CallBack_Render(vector<string> aArg, CSimulator * aSim )
 }
  
 map<string,bool> ExperimentsRan;		//Time is precious, use this list to make sure no experiment ran twice
+
+
 //--------------------------------------------------------------------------------------------
-void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int aMaxLevels, CSimulator * aSim, ofstream & ofs)
+string FormatFactorString( string aFactor )
+{
+	int pos = 0;
+	string ExpFormatedString = aFactor;
+	while ( (pos = ExpFormatedString.find(".")) != string::npos )
+		ExpFormatedString.replace(pos,1,"_");
+
+	while ( (pos = ExpFormatedString.find("-")) != string::npos )
+		ExpFormatedString.replace(pos,1,"_");
+
+	return ExpFormatedString;				
+}
+//--------------------------------------------------------------------------------------------
+void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, 
+	int aMaxLevels, CSimulator * aSim, ofstream & anova, ofstream & plot)
 {
 	static int ExperimentNumber = 0;
 	string strExperimentsRan;
@@ -179,6 +195,13 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 						oss <<  F->mLevel[r] <<  " , ";
 						strExperimentsRan += oss.str();
 					}
+
+					//Make sure to re-initilize the memory
+					aSim->Gpu.Memory.Initialize( 
+							aSim->Scene.OCtree.mParameter["depth"], 
+							aSim->Gpu.Memory.mParameter["cache-lines-per-way"] );
+
+
 					Index++;
 			}
 				
@@ -195,13 +218,20 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset, int 
 
 					ExperimentsRan[ strExperimentsRan ] = true;
 		
+//TODO: What is happening with multiple cores???
+					float CacheSize = ((float)aSim->Gpu.Memory.GetCacheSizeBytes()/1000000.0f);
 
 
-					ofs << aSim->Scene.OCtree.mParameter["depth"] << " , " << strExperimentsRan ;
-					ofs << ((float)aSim->Statistics.Stat["mem.cache.l1.hit_count"]/(float)aSim->Statistics.Stat["mem.total_reads"]) << "  ,  ";
-					ofs << ((float)aSim->Statistics.Stat["mem.cache.l1.miss_count"]/aSim->Statistics.Stat["mem.total_reads"]) << "  ,  ";
-					ofs << aSim->Statistics.Stat["mem.replace_cache_entry"] << " , ";
-					ofs << aSim->Statistics.Stat["mem.external.read_access_count"] << "\n";
+					anova << aSim->Scene.mParameter["resolution-width"] << "x" << aSim->Scene.mParameter["resolution-height"] << " ,  ";
+					anova << aSim->Scene.OCtree.mParameter["depth"] << " , " << CacheSize << " , " << strExperimentsRan ;
+					anova << ((float)aSim->Statistics.Stat["mem.cache.l1.hit_count"]/(float)aSim->Statistics.Stat["mem.total_reads"]) << "  ,  ";
+					anova << ((float)aSim->Statistics.Stat["mem.cache.l1.miss_count"]/aSim->Statistics.Stat["mem.total_reads"]) << "  ,  ";
+					anova << aSim->Statistics.Stat["mem.replace_cache_entry"] << " , ";
+					anova << aSim->Statistics.Stat["mem.external.read_access_count"] << "\n";
+
+//This is for our nice to see plot
+
+				
 					
 
 				}
@@ -217,43 +247,65 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	vector<CStatisticFactor> Factors;
 	
 	
-	Factors.push_back( CStatisticFactor("gpu.core-count","1 8 16 32"));
-	Factors.push_back( CStatisticFactor("gpu.grid-partition-size", "2 10 20 200 ")); //1% 5% 10% 100%
+	//Factors.push_back( CStatisticFactor("gpu.core-count","1 8 16 32"));
+	Factors.push_back( CStatisticFactor("gpu.grid-partition-size", "2 10 20 40 ")); //1% 5% 10% 100%
 	//Factors.push_back( CStatisticFactor("gpu.memory.cache-enabled", "1 0 0 0 "));
-	Factors.push_back( CStatisticFactor("gpu.memory.cache-lines-per-way", "32 64 128 256" ));
+	Factors.push_back( CStatisticFactor("gpu.memory.cache-lines-per-way", "64 512 4096 32768" ));
 
 	//Run the factorial experiment
-	ofstream ofs("experiment.results.csv");
-	if (!ofs.good())
+	ofstream anova("anova.csv");
+	ofstream plot("plot.csv");
+
+
+	if (!anova.good())
 		throw string("Could not open file");
 	//Do the voxelization first because it takes a lot of time
+	std::pair<int,int> Resolutions[] = 
+	{ 
+		
+		std::make_pair<int,int>(640,480),
+		std::make_pair<int,int>(800,600),
+	//	std::make_pair<int,int>(1024,768),
+		std::make_pair<int,int>(1280,720),		//HD (720p)
+		std::make_pair<int,int>(1920,1080),		//Full HD (1080p)
+		std::make_pair<int,int>(3200,1800),		//UHD (4k)
+
+
+	};
 	int VoxelLevel[] = {5,6,7,8};
 
-	ofs << "# Loaded model: " << aSim->mModelName << "\n";
-
-	ofs << "octree.depth , ";
+	anova << "# Loaded model: " << aSim->mModelName << "\n";
+	anova << "resolution,  octree_depth , total_cache_size_mb , ";
 
 	for (int h = 0; h < Factors.size(); h++)
-		ofs << Factors[h].mName << ",";
+		anova << FormatFactorString( Factors[h].mName ) << ",";
 
-	ofs << " cache_l1_hit_rate , cache_l1_miss_rate , cache_replace_rate, external_mem_read_count\n";
+	anova << " cache_l1_hit_rate , cache_l1_miss_rate , cache_replace_rate, external_mem_read_count\n";
+	
 
-	for (int v= 0; v < (sizeof(VoxelLevel)/sizeof(int)); v++ )
+	for (int res = 0; res < sizeof(Resolutions)/sizeof(std::pair<int,int>); res++)
 	{
-		ExperimentsRan.clear();
+		aSim->SetParameter("scene.resolution-width", Resolutions[res].first );
+		aSim->SetParameter("scene.resolution-height", Resolutions[res].second );
 
-		aSim->SetParameter("scene.octree.depth", VoxelLevel[v] );
-		
-		CallBack_Voxelize(vector<string>(),aSim);
-
-		for (int e = 1; e < (2 << Factors.size())-1; e++)
+		for (int v= 0; v < (sizeof(VoxelLevel)/sizeof(int)); v++ )
 		{
-			bitset<32> Bitset(e);
-			cout << Bitset.to_string() << "\n";
-			RunExperiment( Factors,Bitset,4,aSim,ofs);
+			ExperimentsRan.clear();
+
+			aSim->SetParameter("scene.octree.depth", VoxelLevel[v] );
+			
+			CallBack_Voxelize(vector<string>(),aSim);
+
+			for (int e = 1; e < (2 << Factors.size())-1; e++)
+			{
+				bitset<32> Bitset(e);
+				cout << Bitset.to_string() << "\n";
+				RunExperiment( Factors,Bitset,4,aSim,anova,plot);
+			}
 		}
 	}
-	ofs.close();
+	anova.close();
+	plot.close();
 
 	return "Factorial experiment complete\n";
 }
@@ -296,6 +348,7 @@ string CallBack_Show(vector<string> aArg, CSimulator * aSim )
 		<< aSim->Statistics.Print() << "\n"
 		<< " **** \n"
 		<< "Total cache hit rate " << (100*((float)aSim->Statistics.Stat["mem.cache.l1.hit_count"]/(float)aSim->Statistics.Stat["mem.total_reads"])) << "%\n"
+		<< "Total cache size " << ((float)aSim->Gpu.Memory.GetCacheSizeBytes()/1000000.0f) << " MB\n"
 		<< aSim->Gpu.Memory.PrintCacheHitRates() << "\n";
 
 		return oss.str();
@@ -585,7 +638,7 @@ void CSimulator::RenderSwFast( ofstream & ofs )
 //--------------------------------------------------------------------------------------------
 void CSimulator::RenderHw( ofstream & ofs )
 {
-	
+			Gpu.Memory.ClearCaches();
 			Gpu.Execute(  ofs );
 		
 	

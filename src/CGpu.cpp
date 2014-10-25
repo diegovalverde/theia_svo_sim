@@ -83,6 +83,7 @@ void CGpu::Execute( ofstream & ofs)
 	typedef struct T_GridElement { 	int X0,X1,Y0,Y1; } TGridElement;
     vector< TGridElement > GridParitition;
 
+
 	cout << "-I- Initializing Proyection Plane grid partitions\n";
 	for ( int Col = 0; (Col+DX) <= ResolutionHeight ; Col+=DX)
 	{
