@@ -16,6 +16,7 @@ public:
 	void Initialize( int aTreeDepth, int aLinesPerCache );
 	void Clear();
 	string PrintCacheHitRates();
+	string PrintCachePlainStats();
 	unsigned long int GetCacheSizeBytes();
 	 typedef struct T_CacheAddress
 	{

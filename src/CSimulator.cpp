@@ -209,6 +209,8 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset,
 				{
 					cout << strExperimentsRan << "\n";
 					string ImageFileName = std::to_string(ExperimentNumber++) + ".ppm";
+
+					 
 					aSim->RenderFrame(  ImageFileName, RENDER_HW );
 
 					#ifndef _WIN32
@@ -226,12 +228,17 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset,
 					anova << aSim->Scene.OCtree.mParameter["depth"] << " , " << CacheSize << " , " << strExperimentsRan ;
 					anova << ((float)aSim->Statistics.Stat["mem.cache.l1.hit_count"]/(float)aSim->Statistics.Stat["mem.total_reads"]) << "  ,  ";
 					anova << ((float)aSim->Statistics.Stat["mem.cache.l1.miss_count"]/aSim->Statistics.Stat["mem.total_reads"]) << "  ,  ";
-					anova << aSim->Statistics.Stat["mem.replace_cache_entry"] << " , ";
-					anova << aSim->Statistics.Stat["mem.external.read_access_count"] << "\n";
-
+					anova << ((float)aSim->Statistics.Stat["mem.replace_cache_entry"]/aSim->Statistics.Stat["mem.cache.l1.miss_count"]) << " , ";
+					anova << aSim->Statistics.Stat["mem.external.read_access_count"] << " , ";
+					anova << aSim->Statistics.Stat["mem.total_reads"];	
+					anova << "\n";
+					anova << std::flush; //Make sure to flush the file, because factorial sim takes foreaver to finish
 //This is for our nice to see plot
 
-				
+					plot << aSim->Scene.mParameter["resolution-width"] << "x" << aSim->Scene.mParameter["resolution-height"] << " ,  ";
+					plot << aSim->Scene.OCtree.mParameter["depth"] << " , " << CacheSize;
+					plot << strExperimentsRan;
+					plot << aSim->Gpu.Memory.PrintCachePlainStats() << "\n" << std::flush;
 					
 
 				}
@@ -265,7 +272,6 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 		
 		std::make_pair<int,int>(640,480),
 		std::make_pair<int,int>(800,600),
-	//	std::make_pair<int,int>(1024,768),
 		std::make_pair<int,int>(1280,720),		//HD (720p)
 		std::make_pair<int,int>(1920,1080),		//Full HD (1080p)
 		std::make_pair<int,int>(3200,1800),		//UHD (4k)
@@ -277,11 +283,17 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	anova << "# Loaded model: " << aSim->mModelName << "\n";
 	anova << "resolution,  octree_depth , total_cache_size_mb , ";
 
-	for (int h = 0; h < Factors.size(); h++)
-		anova << FormatFactorString( Factors[h].mName ) << ",";
+	plot << "# Loaded model: " << aSim->mModelName << "\n";
+	plot << "# resolution,  octree_depth , total_cache_size_mb , ";  
 
-	anova << " cache_l1_hit_rate , cache_l1_miss_rate , cache_replace_rate, external_mem_read_count\n";
-	
+	for (int h = 0; h < Factors.size(); h++)
+	{ 
+		anova << FormatFactorString( Factors[h].mName ) << ",";
+		plot << FormatFactorString( Factors[h].mName ) << ",";
+	}
+
+	anova << " cache_l1_hit_rate , cache_l1_miss_rate , cache_replace_rate, external_mem_read_count, mem_total_reads\n";
+	plot << "  line_count, used_lines, used_lines_per, replaced_lines, replaced_lines_per, hit_count, read_count, hit_rate_per\n";
 
 	for (int res = 0; res < sizeof(Resolutions)/sizeof(std::pair<int,int>); res++)
 	{
@@ -652,8 +664,9 @@ void CSimulator::RenderFrame( string aFileName, E_RENDER_TYPE aRenderType )
 		throw string("Could not open file '" + aFileName + "' for writting\n");
 
 	OpenRenderFile(ofs );
-
+	//Make sure to clean all of the statistics
 	Statistics.Clear();
+	
 
 	switch (aRenderType)
 	{

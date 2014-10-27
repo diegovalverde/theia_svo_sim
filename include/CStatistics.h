@@ -41,8 +41,13 @@ public:
 	}
 	void   Clear( void )
 	{
+		cout << "-I- Clearing all statistics\n";
 		for (auto I = Stat.begin(); I != Stat.end(); I++)
+		{
 			I->second = 0;
+			cout << I->first << " = " << I->second << "\n";
+			
+		}
 	}
 
 public:

@@ -36,6 +36,32 @@ void CMemory::Initialize( int aTreeDepth, int aLinesPerCache )
 	}
 }
 //---------------------------------------------------------------------------------------------
+string CMemory::PrintCachePlainStats()
+{
+	ostringstream oss;
+	
+	//line count, used lines, used lines %, replaced lines, replaced lines %, hit count, read count, hit rate %, 
+	for (int i = 0; i < mCache_L1.size(); i++)
+	{
+
+		int UsedLines = 0;
+		for (int j = 0; j < mCache_L1[i].mLines.size(); j++)
+			if (mCache_L1[i].mLines[j].Valid == true)
+				UsedLines++;
+	
+
+		oss 
+		<< mCache_L1[i].mLines.size() 
+		<< " , "  <<UsedLines  << " , " << (100*( (float)UsedLines/(float)mCache_L1[i].mLines.size() ) ) 
+		<< " , " << mCache_L1[i].mReplaceLineCount 
+		<< " , " << 100.0f*((float)mCache_L1[i].mReplaceLineCount/(float)( mCache_L1[i].mReadCount - mCache_L1[i].mHitCount ) ) 
+		<< " , " << mCache_L1[i].mHitCount <<  " , " 	<< mCache_L1[i].mReadCount 
+		<< " , " << (100*((float)mCache_L1[i].mHitCount / (float)mCache_L1[i].mReadCount)) << "        ,         ";
+		
+	}	
+	return oss.str();	
+}
+//---------------------------------------------------------------------------------------------
 string CMemory::PrintCacheHitRates()
 {
 	ostringstream oss;
@@ -132,12 +158,6 @@ double CMemory::Read( TAddress aAddress )
 		
 	}
 	
-	//Not in cache, ok go read from second cache
-/*	if ( (Hit = Cache_L2.Read( aAddress, Data ) == true))
-	{
-		Cache_L2.Write(aAddress,Data);
-		return Data;
-	}*/
 
 	Statistics->Stat["mem.external.read_access_count"] += 1;
 	return mMainBuffer[aAddress.LogicAddr];
@@ -146,6 +166,7 @@ double CMemory::Read( TAddress aAddress )
 //---------------------------------------------------------------------------------------------
 void CMemory::CCache::Clear() 
 { 
+	cout << "-I- Clearing caches\n";
 	mWriteCount = 0; 
 	mReadCount  = 0; 
 	mHitCount   = 0; 
@@ -156,6 +177,7 @@ void CMemory::CCache::Clear()
 		mLines[i].Tag = 0;
 		mLines[i].Block = 0xffff;
 	}
+
 }
 //---------------------------------------------------------------------------------------------
 unsigned long int CMemory::CCache::GetSizeBytes()
@@ -231,7 +253,8 @@ void CMemory::CCache::Write( CMemory::TAddress aAddress, unsigned int & aData, C
 		bitset<32> BitsetNew(Index);
 
 		mReplaceLineCount++;
-		aStatistics->Stat["replace_cache_entry"] += 1;
+		aStatistics->Stat["mem.replace_cache_entry"] += 1;
+		
 	}
 
 	mLines[ Index ].Tag = aAddress.LogicAddr;//Address.Tag;
