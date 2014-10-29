@@ -8,6 +8,7 @@ CGpu::CGpu()
 	mParameter["grid-partition-size"] = 10;
 	mParameter["x0"]                  = 0;
 	mParameter["y0"]                  = 0;
+	mParameter["print-status"]       = 1;
 
 	mObjects["memory"] = (CGenericObject*)&Memory;
 	Gt.push_back( CGeometryTraversalUnit() );
@@ -83,8 +84,9 @@ void CGpu::Execute( ofstream & ofs)
 	typedef struct T_GridElement { 	int X0,X1,Y0,Y1; } TGridElement;
     vector< TGridElement > GridParitition;
 
+	if (mParameter["print-status"] == 1)
+		cout << "-I- Initializing Proyection Plane grid partitions\n";
 
-	cout << "-I- Initializing Proyection Plane grid partitions\n";
 	for ( int Col = 0; (Col+DX) <= ResolutionHeight ; Col+=DX)
 	{
 		for ( int Row = 0; (Row+DX) <= ResolutionWidth ; Row+=DX)
@@ -95,7 +97,9 @@ void CGpu::Execute( ofstream & ofs)
 		}
 	}
 
-	cout << "-I- Initializing color dump memory\n";
+if (mParameter["print-status"] == 1)
+		cout << "-I- Initializing color dump memory\n";
+
 	vector< vector< bool> > ColorDump ;
 	for (int Row = 0; Row < ResolutionWidth; Row++)
 	{
@@ -109,7 +113,8 @@ void CGpu::Execute( ofstream & ofs)
 	vector<TMortonCode> GtResut;
 	for (int ParititioIndex = 0; ParititioIndex < (GridParitition.size()/mParameter["core-count"]); ParititioIndex++)
 	{
-		printf("]\n[ %-3d , %-3d, %-3d , %-3d ] [ ",
+		if (mParameter["print-status"] == 1)
+			printf("]\n[ %-3d , %-3d, %-3d , %-3d ] [ ",
 		GridParitition[ParititioIndex].X0 , GridParitition[ParititioIndex].Y0,
 		GridParitition[ParititioIndex].X1, GridParitition[ParititioIndex].Y1 );
 
@@ -133,10 +138,13 @@ void CGpu::Execute( ofstream & ofs)
 				ColorDump[Row][Col] = (GtResut == NULL_MORTON_IDX) ? false : true;
 				
 			}
-			cout << ".";
+			if (mParameter["print-status"] == 1)
+				cout << ".";
 		}
 	}
-	cout << "]\n Dumping colors to file\n";
+	
+	if (mParameter["print-status"] == 1)
+		cout << "]\n Dumping colors to file\n";
 
 	//Now dump the colors into the file
 	for ( int Col = 0; Col < ResolutionHeight ; Col++)
