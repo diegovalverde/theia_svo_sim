@@ -166,7 +166,7 @@ double CMemory::Read( TAddress aAddress )
 //---------------------------------------------------------------------------------------------
 void CMemory::CCache::Clear() 
 { 
-	cout << "-I- Clearing caches\n";
+	//cout << "-I- Clearing caches\n";
 	mWriteCount = 0; 
 	mReadCount  = 0; 
 	mHitCount   = 0; 

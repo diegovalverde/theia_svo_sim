@@ -252,7 +252,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 {
 	
 	vector<CStatisticFactor> Factors;
-	
+	aSim->Gpu.mParameter["print-status"] = 0;	
 	
 	//Factors.push_back( CStatisticFactor("gpu.core-count","1 8 16 32"));
 	Factors.push_back( CStatisticFactor("gpu.grid-partition-size", "2 10 20 40 ")); //1% 5% 10% 100%
@@ -318,6 +318,8 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	}
 	anova.close();
 	plot.close();
+
+	aSim->Gpu.mParameter["print-status"] = 1;	
 
 	return "Factorial experiment complete\n";
 }
