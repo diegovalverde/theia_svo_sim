@@ -261,7 +261,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 
 	//Run the factorial experiment
 	ofstream anova(aSim->ExperimentParameters.LogFileName.c_str());
-	ofstream plot("plot.csv");
+	ofstream plot( string( "plot.csv" + aSim->ExperimentParameters.LogFileName).c_str() );
 
 
 	if (!anova.good())
