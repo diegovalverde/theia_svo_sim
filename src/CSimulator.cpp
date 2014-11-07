@@ -257,7 +257,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	//Factors.push_back( CStatisticFactor("gpu.core-count","1 8 16 32"));
 	Factors.push_back( CStatisticFactor("gpu.grid-partition-size", "2 10 20 40 ")); //1% 5% 10% 100%
 	//Factors.push_back( CStatisticFactor("gpu.memory.cache-enabled", "1 0 0 0 "));
-	Factors.push_back( CStatisticFactor("gpu.memory.cache-lines-per-way", "64 512 4096 32768" ));
+	Factors.push_back( CStatisticFactor("gpu.memory.cache-lines-per-way", "512 4096 32768 262144" ));
 
 	//Run the factorial experiment
 	ofstream anova(aSim->ExperimentParameters.LogFileName.c_str());
@@ -266,20 +266,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 
 	if (!anova.good())
 		throw string("Could not open file");
-#if 0	
-	//Do the voxelization first because it takes a lot of time
-	std::pair<int,int> Resolutions[] = 
-	{ 
-		
-		std::make_pair<int,int>(640,480),
-		std::make_pair<int,int>(800,600),
-		std::make_pair<int,int>(1280,720),		//HD (720p)
-		std::make_pair<int,int>(1920,1080),		//Full HD (1080p)
-		std::make_pair<int,int>(3200,1800),		//UHD (4k)
 
-
-	};
-#endif	
 	int VoxelLevel[] = {5,6,7,8};
 
 	anova << "# Loaded model: " << aSim->mModelName << "\n";
