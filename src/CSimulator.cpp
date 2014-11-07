@@ -331,6 +331,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	aSim->Gpu.mParameter["print-status"] = 1;	
 
 	return "Factorial experiment complete\n";
+	exit(0);
 }
 //--------------------------------------------------------------------------------------------
 string CallBack_Show(vector<string> aArg, CSimulator * aSim )
