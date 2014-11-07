@@ -18,6 +18,8 @@ int main(int argc, char * argv[])
 		//See if the W or the H are specified in the command line
 		int Width = 0,Heigth = 0;
 		bool ResolutionSpecified = false;
+		Simulator.ExperimentParameters.Depth = 5;
+
 		for (int i = 1; i < argc; i++)
 		{
 
@@ -27,6 +29,9 @@ int main(int argc, char * argv[])
 			
 			if (Arg == "-W")
 				Width = StringToInt( argv[++i]);
+
+			if (Arg == "-D")
+				Simulator.ExperimentParameters.Depth = StringToInt( argv[++i]);
 
 		}
 

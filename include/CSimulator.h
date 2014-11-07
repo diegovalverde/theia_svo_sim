@@ -55,6 +55,7 @@ public:
 	struct
 	{
 		vector< std::pair<int,int> > Resolutions;
+		int                          Depth;
 	} ExperimentParameters;
 
 

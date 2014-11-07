@@ -307,11 +307,13 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 		aSim->SetParameter("scene.resolution-height", res->second);			//Resolutions[res].second );
 		cout << aSim->Scene.mParameter["resolution-width"] << "x" << aSim->Scene.mParameter["resolution-height"] << "\n";
 
-		for (int v= 0; v < (sizeof(VoxelLevel)/sizeof(int)); v++ )
-		{
+		//for (int v= 0; v < (sizeof(VoxelLevel)/sizeof(int)); v++ )
+		//{
 			ExperimentsRan.clear();
 
-			aSim->SetParameter("scene.octree.depth", VoxelLevel[v] );
+			//aSim->SetParameter("scene.octree.depth", VoxelLevel[v] );
+			cout << "-I- Octree depth " << aSim->ExperimentParameters.Depth  << "\n";
+			aSim->SetParameter("scene.octree.depth", aSim->ExperimentParameters.Depth );
 			
 			CallBack_Voxelize(vector<string>(),aSim);
 
@@ -321,7 +323,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 				cout << Bitset.to_string() << "\n";
 				RunExperiment( Factors,Bitset,4,aSim,anova,plot);
 			}
-		}
+		//}
 	}
 	anova.close();
 	plot.close();
