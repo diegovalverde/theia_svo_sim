@@ -19,6 +19,7 @@ int main(int argc, char * argv[])
 		int Width = 0,Heigth = 0;
 		bool ResolutionSpecified = false;
 		Simulator.ExperimentParameters.Depth = 5;
+		Simulator.ExperimentParameters.LogFileName = "anova.csv";
 
 		for (int i = 1; i < argc; i++)
 		{
@@ -32,6 +33,9 @@ int main(int argc, char * argv[])
 
 			if (Arg == "-D")
 				Simulator.ExperimentParameters.Depth = StringToInt( argv[++i]);
+
+			if (Arg == "-L")
+				Simulator.ExperimentParameters.LogFileName = string(argv[++i]);
 
 		}
 

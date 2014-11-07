@@ -260,7 +260,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	Factors.push_back( CStatisticFactor("gpu.memory.cache-lines-per-way", "64 512 4096 32768" ));
 
 	//Run the factorial experiment
-	ofstream anova("anova.csv");
+	ofstream anova(aSim->ExperimentParameters.LogFileName.c_str());
 	ofstream plot("plot.csv");
 
 
