@@ -56,6 +56,7 @@ public:
 	{
 		string                       LogFileName;
 		vector< std::pair<int,int> > Resolutions;
+		bool						 BatchMode;
 		int                          Depth;
 	} ExperimentParameters;
 

@@ -20,6 +20,9 @@ int main(int argc, char * argv[])
 		bool ResolutionSpecified = false;
 		Simulator.ExperimentParameters.Depth = 5;
 		Simulator.ExperimentParameters.LogFileName = "anova.csv";
+		Simulator.ExperimentParameters.BatchMode = false;
+		bool LoadConfig = false;
+		string ConfigPath;
 
 		for (int i = 1; i < argc; i++)
 		{
@@ -36,6 +39,16 @@ int main(int argc, char * argv[])
 
 			if (Arg == "-L")
 				Simulator.ExperimentParameters.LogFileName = string(argv[++i]);
+
+			if (Arg == "-C")
+			{
+				ConfigPath = string(argv[++i]);
+				LoadConfig = true;
+			}
+
+			if (Arg == "-B")
+				Simulator.ExperimentParameters.BatchMode = true;
+
 
 		}
 
@@ -63,9 +76,19 @@ int main(int argc, char * argv[])
 	//Shorcut for VS210 path
 	Simulator.Initialize("teapod_svo__depth_4.config");
 #else
-	Simulator.Initialize();	
+	if (LoadConfig)
+		Simulator.Initialize(ConfigPath);
+	else
+		Simulator.Initialize();	
 #endif	
 	
+	if (Simulator.ExperimentParameters.BatchMode)
+	{
+		vector<string> Tokens;
+		Tokens.push_back("rfe");
+		Simulator.ExecuteCommand(Tokens);
+	}
+
 	//Simulator.Initialize("suzane_avo__depth_2.config");
 	cout << "Type 'help' to see the available commands\n";
 	

@@ -329,9 +329,10 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	plot.close();
 
 	aSim->Gpu.mParameter["print-status"] = 1;	
-
+	if (aSim->ExperimentParameters.BatchMode)
+		exit(0);
 	return "Factorial experiment complete\n";
-	exit(0);
+
 }
 //--------------------------------------------------------------------------------------------
 string CallBack_Show(vector<string> aArg, CSimulator * aSim )
