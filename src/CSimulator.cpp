@@ -266,6 +266,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 
 	if (!anova.good())
 		throw string("Could not open file");
+#if 0	
 	//Do the voxelization first because it takes a lot of time
 	std::pair<int,int> Resolutions[] = 
 	{ 
@@ -278,6 +279,7 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 
 
 	};
+#endif	
 	int VoxelLevel[] = {5,6,7,8};
 
 	anova << "# Loaded model: " << aSim->mModelName << "\n";
@@ -295,10 +297,15 @@ string CallBack_RunFactorialExperiment(vector<string> aArg, CSimulator * aSim )
 	anova << " cache_l1_hit_rate , cache_l1_miss_rate , cache_replace_rate, external_mem_read_count, mem_total_reads\n";
 	plot << "  line_count, used_lines, used_lines_per, replaced_lines, replaced_lines_per, hit_count, read_count, hit_rate_per\n";
 
+#if 0
 	for (int res = 0; res < sizeof(Resolutions)/sizeof(std::pair<int,int>); res++)
+#else
+	for (auto res = aSim->ExperimentParameters.Resolutions.begin(); res !=  aSim->ExperimentParameters.Resolutions.end(); res++)
+#endif	
 	{
-		aSim->SetParameter("scene.resolution-width", Resolutions[res].first );
-		aSim->SetParameter("scene.resolution-height", Resolutions[res].second );
+		aSim->SetParameter("scene.resolution-width", res->first);			//Resolutions[res].first );
+		aSim->SetParameter("scene.resolution-height", res->second);			//Resolutions[res].second );
+		cout << aSim->Scene.mParameter["resolution-width"] << "x" << aSim->Scene.mParameter["resolution-height"] << "\n";
 
 		for (int v= 0; v < (sizeof(VoxelLevel)/sizeof(int)); v++ )
 		{
@@ -363,6 +370,7 @@ string CallBack_Show(vector<string> aArg, CSimulator * aSim )
 		<< " **** \n"
 		<< "Total cache hit rate " << (100*((float)aSim->Statistics.Stat["mem.cache.l1.hit_count"]/(float)aSim->Statistics.Stat["mem.total_reads"])) << "%\n"
 		<< "Total cache size " << ((float)aSim->Gpu.Memory.GetCacheSizeBytes()/1000000.0f) << " MB\n"
+		<< "Total cache used lines " << aSim->Gpu.Memory.GetCacheUsedLineCount() << "\n"
 		<< aSim->Gpu.Memory.PrintCacheHitRates() << "\n";
 
 		return oss.str();

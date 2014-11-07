@@ -38,7 +38,7 @@ public:
 	vector< CFace<3> > FaceIndexList;
 	CVector Center;
 	CVoxel Voxel;
-	
+	CVector IntersectionPoint;	
 };
 //---------------------------------------------------------------------------------------------------------------------
 class COctree : public CGenericObject

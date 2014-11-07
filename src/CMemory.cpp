@@ -52,10 +52,12 @@ string CMemory::PrintCachePlainStats()
 
 		oss 
 		<< mCache_L1[i].mLines.size() 
-		<< " , "  <<UsedLines  << " , " << (100*( (float)UsedLines/(float)mCache_L1[i].mLines.size() ) ) 
+		<< " , "  <<UsedLines  
+		<< " , " << (100*( (float)UsedLines/(float)mCache_L1[i].mLines.size() ) ) 
 		<< " , " << mCache_L1[i].mReplaceLineCount 
 		<< " , " << 100.0f*((float)mCache_L1[i].mReplaceLineCount/(float)( mCache_L1[i].mReadCount - mCache_L1[i].mHitCount ) ) 
-		<< " , " << mCache_L1[i].mHitCount <<  " , " 	<< mCache_L1[i].mReadCount 
+		<< " , " << mCache_L1[i].mHitCount 
+		<<  " , " 	<< mCache_L1[i].mReadCount 
 		<< " , " << (100*((float)mCache_L1[i].mHitCount / (float)mCache_L1[i].mReadCount)) << "        ,         ";
 		
 	}	
@@ -89,6 +91,7 @@ string CMemory::PrintCacheHitRates()
 //---------------------------------------------------------------------------------------------
 void CMemory::Write( TMortonCode aAddress, unsigned long aData )
 {
+	Statistics->Stat["mem.external.used_rows"] += 1;
 	mMainBuffer[ aAddress ] = aData;
 }
 //---------------------------------------------------------------------------------------------
@@ -109,6 +112,17 @@ unsigned long int CMemory::GetCacheSizeBytes()
 
 	return SizeBytes;
 
+}
+//---------------------------------------------------------------------------------------------
+unsigned long CMemory::GetCacheUsedLineCount()
+{
+	unsigned long UsedLines = 0;
+	for (int i = 0; i < mCache_L1.size(); i++)
+		for (int j = 0; j < mCache_L1[i].mLines.size(); j++)
+		if (mCache_L1[i].mLines[j].Valid)
+			UsedLines++;
+
+	return UsedLines;	
 }
 //---------------------------------------------------------------------------------------------
 double CMemory::Read( TAddress aAddress )

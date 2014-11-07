@@ -52,6 +52,10 @@ public:
 	CGpu   Gpu;
 public:
 	string mModelName;
+	struct
+	{
+		vector< std::pair<int,int> > Resolutions;
+	} ExperimentParameters;
 
 
 private:
@@ -60,6 +64,8 @@ private:
 
 	
 	map<string, TCommand> mCommands;
+
+	
 	
 
 };

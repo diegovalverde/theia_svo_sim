@@ -18,6 +18,7 @@ public:
 	string PrintCacheHitRates();
 	string PrintCachePlainStats();
 	unsigned long int GetCacheSizeBytes();
+	unsigned long int GetCacheUsedLineCount();
 	 typedef struct T_CacheAddress
 	{
 			

@@ -347,8 +347,16 @@ bool COctant::RayIntersection( CRay aRay )
 	float tmin = (MinVertex.x - aRay.Origen.x) * aRay.InvDirection.x;
     float tmax = (MaxVertex.x - aRay.Origen.x) * aRay.InvDirection.x;
     if (tmin > tmax) swap(tmin, tmax);
+
+    float txmin = (MinVertex.x - aRay.Origen.x) * aRay.InvDirection.x;		//Added
+    float txmax = (MaxVertex.x - aRay.Origen.x) * aRay.InvDirection.x;		//Added
+	if (txmin > txmax) swap(txmin, txmax);									//Added
+
+
     float tymin = (MinVertex.y - aRay.Origen.y) * aRay.InvDirection.y;
     float tymax = (MaxVertex.y - aRay.Origen.y) * aRay.InvDirection.y;
+
+
     if (tymin > tymax) swap(tymin, tymax);
     if ((tmin > tymax) || (tymin > tmax))
         return false;
@@ -363,6 +371,10 @@ bool COctant::RayIntersection( CRay aRay )
 
     if ((tmin > tzmax) || (tzmin > tmax))
         return false;
+
+    IntersectionPoint.x = txmin;
+    IntersectionPoint.y = tymin;
+    IntersectionPoint.z = tzmin;
 
     return true;
 }

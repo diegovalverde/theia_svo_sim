@@ -134,8 +134,13 @@ if (mParameter["print-status"] == 1)
 				//In reality I do not need to model all of the gt, only one of them... however it would be best to model
 				//this single guy going tru the grid and then 'reseting' the cache and averaging the hits/misses
 				TMortonCode  GtResut = Gt[ 0 ].Execute( Ray, ROOT_MORTON_CODE, NON_EMPTY );
-				
+
+#ifdef DO_COLORING				
+				Scene->OCtree.Octant[ GtResut ].IntersectionPoint //Use ilumination to get the color!!
+#else				
 				ColorDump[Row][Col] = (GtResut == NULL_MORTON_IDX) ? false : true;
+#endif
+
 				
 			}
 			if (mParameter["print-status"] == 1)

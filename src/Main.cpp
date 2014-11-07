@@ -1,5 +1,7 @@
 #include "../include/CSimulator.h"
+#include "../include/Common.h"
 #include <sstream>
+#include <algorithm>
 #include <iterator>
 #ifndef _WIN32
  #include <readline/readline.h>
@@ -8,11 +10,45 @@
 
 CSimulator Simulator;
 
-int main(void)
+int main(int argc, char * argv[])
 {
 	try
 	{
 		
+		//See if the W or the H are specified in the command line
+		int Width = 0,Heigth = 0;
+		bool ResolutionSpecified = false;
+		for (int i = 1; i < argc; i++)
+		{
+
+			string Arg = argv[i];
+			if (Arg == "-H")
+				Heigth = StringToInt( argv[++i]);
+			
+			if (Arg == "-W")
+				Width = StringToInt( argv[++i]);
+
+		}
+
+		if (Width || Heigth)
+		{
+			std::pair<int,int> Res;
+			Res.first = Width;
+			Res.second = Heigth;
+			Simulator.ExperimentParameters.Resolutions.push_back( Res);
+		}
+		else
+		{
+			Simulator.ExperimentParameters.Resolutions.push_back( std::make_pair<int,int>(640,480)  );
+			Simulator.ExperimentParameters.Resolutions.push_back( std::make_pair<int,int>(800,600)  );
+			Simulator.ExperimentParameters.Resolutions.push_back( std::make_pair<int,int>(1280,720) );		//HD (720p)
+			Simulator.ExperimentParameters.Resolutions.push_back( std::make_pair<int,int>(1920,1080) );		//Full HD (1080p)
+			Simulator.ExperimentParameters.Resolutions.push_back( std::make_pair<int,int>(3200,1800) );		//UHD (4k)
+		}
+
+
+
+
 
 #ifdef _WIN32
 	//Shorcut for VS210 path
