@@ -54,6 +54,7 @@ public:
 	string mModelName;
 	struct
 	{
+		string                       LogFileName;
 		vector< std::pair<int,int> > Resolutions;
 		int                          Depth;
 	} ExperimentParameters;
