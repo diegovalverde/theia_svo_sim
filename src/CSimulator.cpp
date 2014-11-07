@@ -208,7 +208,7 @@ void RunExperiment(vector<CStatisticFactor> & aFactors, bitset<32> aBitset,
 				if (ExperimentsRan.find( strExperimentsRan ) == ExperimentsRan.end())
 				{
 					cout << strExperimentsRan << "\n";
-					string ImageFileName = std::to_string(ExperimentNumber++) + ".ppm";
+					string ImageFileName =  aSim->ExperimentParameters.LogFileName + std::to_string(ExperimentNumber++) + ".ppm";
 
 					 
 					aSim->RenderFrame(  ImageFileName, RENDER_HW );
